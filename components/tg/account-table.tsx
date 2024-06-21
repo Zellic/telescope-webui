@@ -15,9 +15,9 @@ const columns = [
 export function AccountTable(props: {users: TelegramAccount[]}) {
 	const renderCell = React.useCallback((user: TelegramAccount, columnKey: string) => {
 		let status = "warning"
-		if(user.status.key === "AuthorizationSuccess") {
+		if(user.status.stage === "AuthorizationSuccess") {
 			status = "success";
-		} else if(user.status.key === "AuthorizationFailed" || user.status.requiresInput === true) {
+		} else if(user.status.stage === "AuthorizationFailed" || user.status.inputRequired === true) {
 			status = "danger"
 		}
 
@@ -34,7 +34,7 @@ export function AccountTable(props: {users: TelegramAccount[]}) {
 						{/*</Chip>*/}
 						<div className="flex flex-col">
 							<p className="text-bold text-sm capitalize">{user.username ?? "<no username>"}</p>
-							<p className="text-bold text-sm capitalize text-default-400">{user.phoneNumber}</p>
+							<p className="text-bold text-sm capitalize text-default-400">{user.phone}</p>
 						</div>
 					</div>
 				)
@@ -48,7 +48,7 @@ export function AccountTable(props: {users: TelegramAccount[]}) {
 			case "status":
 				return (
 					<Chip className="capitalize" color={status as any} size="sm" variant="flat">
-						{user.status.key}
+						{user.status.stage}
 					</Chip>
 				);
 			case "actions":
@@ -85,7 +85,7 @@ export function AccountTable(props: {users: TelegramAccount[]}) {
 			</TableHeader>
 			<TableBody items={props.users}>
 				{(item) => (
-					<TableRow key={item.phoneNumber}>
+					<TableRow key={item.phone}>
 						<TableCell>{renderCell(item, "name")}</TableCell>
 						<TableCell>{renderCell(item, "status")}</TableCell>
 						<TableCell>{renderCell(item, "actions")}</TableCell>
