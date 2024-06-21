@@ -7,13 +7,13 @@ export type AuthState =
 	| "AuthorizationSuccess"
 	| "AuthorizationFailed";
 
-export interface AccountStatus {
-	key: AuthState;
-	requiresInput: boolean;
+export interface AuthenticationStatus {
+	stage: AuthState;
+	inputRequired: boolean;
 }
 
 export interface TelegramAccount {
-	phoneNumber: string;
+	phone: string;
 	username?: string;
-	status: AccountStatus;
+	status: AuthenticationStatus;
 }
