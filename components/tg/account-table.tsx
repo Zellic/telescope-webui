@@ -14,7 +14,7 @@ const columns = [
 	{name: "ACTIONS", uid: "actions"},
 ];
 
-export function AccountTable(props: {users: TelegramAccount[]}) {
+export function AccountTable(props: {users: TelegramAccount[], onProvideClicked: (user: TelegramAccount) => void}) {
 	const renderCell = React.useCallback((user: TelegramAccount, columnKey: string) => {
 		let status = "warning"
 		if(user.status.stage === "AuthorizationSuccess") {
@@ -57,7 +57,7 @@ export function AccountTable(props: {users: TelegramAccount[]}) {
 				if(status === "success")
 					return null;
 				return (
-					<Button isLoading={status === "warning"}>
+					<Button isLoading={status === "warning"} onClick={() => {props.onProvideClicked(user)}}>
 						Provide
 					</Button>
 				)
