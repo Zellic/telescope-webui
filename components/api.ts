@@ -29,7 +29,8 @@ export class ApiService {
 	private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 		const response = await fetch(`${this.baseURL}${endpoint}`, options);
 		if (!response.ok) {
-			throw new Error('Network response was not ok');
+			console.log(response);
+			throw new Error('Network response was not okay.');
 		}
 		return response.json();
 	}
