@@ -21,10 +21,14 @@ export default function AccountTableWithData() {
 		try {
 			const apiService = ApiService.getInstance();
 			const clients = await apiService.getClients();
-			setUsers(clients);
-			setFailedToReachServer(false);
+			if(clients.success) {
+				setUsers(clients.data);
+			} else {
+				console.error(`Error fetching from server: ${clients.error}`)
+			}
+			setFailedToReachServer(!clients.success);
 		} catch (error) {
-			console.error('Error fetching clients:', error);
+			console.error('Error fetching clients: ', error);
 			setFailedToReachServer(true);
 		} finally {
 			setIsLoading(false);
@@ -54,8 +58,24 @@ export default function AccountTableWithData() {
 	}
 
 	function onValueProvided(value: any) {
-		console.log(value)
-		setAuthenticatingUser(null)
+		// TODO: instantly update state to waiting for server and set spinner
+		(async () => {
+			try {
+				const apiService = ApiService.getInstance();
+				const submit = await apiService.submitValue(authenticatingUser?.phone!, authenticatingUser?.status.stage!, value);
+				if(submit.success) {
+					// should probably tell them... and maybe reopen modal?
+				} else {
+					console.error(`Error submitting code to server: ${submit.error}`)
+					setFailedToReachServer(true);
+				}
+			} catch (error) {
+				console.error('Error submitting code to server: ', error);
+				setFailedToReachServer(true);
+			}
+
+			setAuthenticatingUser(null)
+		})()
 	}
 
 	return (
