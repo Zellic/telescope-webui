@@ -1,5 +1,13 @@
 import { TelegramAccount } from "@/components/tg/account-table-types";
 
+export type Result<T, E = string> = {
+	success: true;
+	data: T;
+} | {
+	success: false;
+	error: E;
+};
+
 export class ApiService {
 	private static instance: ApiService;
 	private readonly baseURL: string;
@@ -26,17 +34,41 @@ export class ApiService {
 		return ApiService.instance;
 	}
 
-	private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-		const response = await fetch(`${this.baseURL}${endpoint}`, options);
-		if (!response.ok) {
-			console.log(response);
-			throw new Error('Network response was not okay.');
+	private async request<T>(endpoint: string, options?: RequestInit): Promise<Result<T>> {
+		try {
+			const response = await fetch(`${this.baseURL}${endpoint}`, options);
+			const data = await response.json();
+
+			if (!response.ok) {
+				return {
+					success: false,
+					error: data.error || 'Unknown error occurred'
+				};
+			}
+
+			return {
+				success: true,
+				data: data as T
+			};
+		} catch (error) {
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : 'Unknown error occurred'
+			};
 		}
-		return response.json();
 	}
 
-	public async getClients(): Promise<Array<TelegramAccount>> {
-		// TODO: zod verify...
+	public async getClients(): Promise<Result<Array<TelegramAccount>>> {
 		return this.request<Array<TelegramAccount>>('/clients');
+	}
+
+	public async submitValue(phone: string, stage: string, value: string): Promise<Result<{ message: string }>> {
+		return this.request<{ message: string }>('/submitvalue', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ phone, stage, value }),
+		});
 	}
 }
