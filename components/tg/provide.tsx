@@ -1,9 +1,19 @@
 import React, { useRef, useState } from "react";
-import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure} from "@nextui-org/react";
+import {
+	Modal,
+	ModalContent,
+	ModalHeader,
+	ModalBody,
+	ModalFooter,
+	Button,
+	useDisclosure,
+	Spinner
+} from "@nextui-org/react";
 import { TelegramAccount } from "@/components/tg/account-table-types";
 import { Input } from "@nextui-org/input";
 
 interface ProvideModalParams {
+	submitting: boolean,
 	isOpen: boolean;
 	onClose: () => void;
 	onValue: (value: any) => void;
@@ -61,29 +71,46 @@ export default function ProvideModal(props: ProvideModalParams) {
 				{(onClose) => (
 					<>
 						<ModalHeader className="flex flex-col gap-1">{props.user.status.stage}</ModalHeader>
-						<ModalBody>
-							<p>
-								Please enter the thingy.
-							</p>
-							<div>
-								<Input
-									isRequired={true}
-									type={item!.inputType}
-									label={item!.label}
-									placeholder={item!.placeholder}
-									value={value}
-									onValueChange={(newvalue) => {setValue(newvalue)}}
-								/>
-							</div>
-						</ModalBody>
-						<ModalFooter>
-							<Button color="danger" variant="light" onPress={onClose}>
-								Close
-							</Button>
-							<Button color="primary" onPress={() => {onValue(value)}}>
-								Submit
-							</Button>
-						</ModalFooter>
+						{props.submitting ?
+							(
+								<>
+									<ModalBody>
+										Submitting...
+									</ModalBody>
+									<ModalFooter>
+										<Spinner />
+									</ModalFooter>
+								</>
+							)
+								:
+							(
+								<>
+									<ModalBody>
+										<p>
+											Please enter the thingy.
+										</p>
+										<div>
+											<Input
+												isRequired={true}
+												type={item!.inputType}
+												label={item!.label}
+												placeholder={item!.placeholder}
+												value={value}
+												onValueChange={(newvalue) => {setValue(newvalue)}}
+											/>
+										</div>
+									</ModalBody>
+									<ModalFooter>
+										<Button color="danger" variant="light" onPress={onClose}>
+											Close
+										</Button>
+										<Button color="primary" onPress={() => {onValue(value)}}>
+											Submit
+										</Button>
+									</ModalFooter>
+								</>
+							)
+						}
 					</>
 				)}
 			</ModalContent>

@@ -13,6 +13,7 @@ export default function AccountTableWithData() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [failedToReachServer, setFailedToReachServer] = useState(false);
 	const [authenticatingUser, setAuthenticatingUser] = useState<TelegramAccount | null>(null)
+	const [submitting, setSubmitting] = useState<boolean>(false)
 
 	const fetchUsers = useCallback(async () => {
 		if (failedToReachServer) return;
@@ -36,7 +37,8 @@ export default function AccountTableWithData() {
 	}, [failedToReachServer]);
 
 	useRepeatEveryForeground(
-		{ interval: 1500, idle_interval: 60000, onMount: true },
+		// TODO: Important- these calls overlap if the server is responding slow, which it very well may do if Telegram is choking the async loop with data
+		{ interval: 5000, idle_interval: 60000, onMount: true },
 		fetchUsers,
 		[fetchUsers]
 	);
@@ -58,13 +60,31 @@ export default function AccountTableWithData() {
 	}
 
 	function onValueProvided(value: any) {
-		// TODO: instantly update state to waiting for server and set spinner
 		(async () => {
 			try {
 				const apiService = ApiService.getInstance();
+				setSubmitting(true)
 				const submit = await apiService.submitValue(authenticatingUser?.phone!, authenticatingUser?.status.stage!, value);
+				await new Promise(r => setTimeout(r, 2000));
+				setSubmitting(false)
+
 				if(submit.success) {
-					// should probably tell them... and maybe reopen modal?
+					if(users === null || authenticatingUser === null) // shouldn't be possible...
+						return
+
+					const updatedUsers = users.map(user => {
+						if (user.phone === authenticatingUser.phone) {
+							return {
+								...user,
+								status: {
+									...user.status,
+									inputRequired: false,
+								}
+							};
+						}
+						return user;
+					});
+					setUsers(updatedUsers);
 				} else {
 					console.error(`Error submitting code to server: ${submit.error}`)
 					setFailedToReachServer(true);
@@ -82,6 +102,7 @@ export default function AccountTableWithData() {
 		<>
 			<div>
 				<ProvideModal
+					submitting={submitting}
 					isOpen={authenticatingUser !== null}
 					onClose={() => {onClose()}}
 					onValue={(value) => {onValueProvided(value)}}
