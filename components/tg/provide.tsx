@@ -12,11 +12,14 @@ import {
 import { TelegramAccount } from "@/components/tg/account-table-types";
 import { Input } from "@nextui-org/input";
 
+type UseStateReturn<T> = [T, React.Dispatch<React.SetStateAction<T>>];
+
 interface ProvideModalParams {
 	submitting: boolean,
 	isOpen: boolean;
 	onClose: () => void;
-	onValue: (value: any) => void;
+	onSubmit: (value: any) => void;
+	inputValue: UseStateReturn<string>,
 	user: TelegramAccount
 }
 
@@ -59,10 +62,9 @@ const validators: { [key: string]: InputType } = {
 export default function ProvideModal(props: ProvideModalParams) {
 	const {isOpen, onOpenChange} = useDisclosure({isOpen: props.isOpen});
 	const item = props.isOpen ? validators[props.user.status.stage] : null;
-	const [value, setValue] = useState("")
 
-	function onValue(value: any) {
-		props.onValue(value);
+	function onSubmit(value: any) {
+		props.onSubmit(value);
 	}
 
 	return (
@@ -95,8 +97,8 @@ export default function ProvideModal(props: ProvideModalParams) {
 												type={item!.inputType}
 												label={item!.label}
 												placeholder={item!.placeholder}
-												value={value}
-												onValueChange={(newvalue) => {setValue(newvalue)}}
+												value={props.inputValue[0]}
+												onValueChange={(newvalue) => {props.inputValue[1](newvalue)}}
 											/>
 										</div>
 									</ModalBody>
@@ -104,7 +106,7 @@ export default function ProvideModal(props: ProvideModalParams) {
 										<Button color="danger" variant="light" onPress={onClose}>
 											Close
 										</Button>
-										<Button color="primary" onPress={() => {onValue(value)}}>
+										<Button color="primary" onPress={() => {onSubmit(props.inputValue[0])}}>
 											Submit
 										</Button>
 									</ModalFooter>
