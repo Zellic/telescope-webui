@@ -17,6 +17,7 @@ export default function AccountTableWithData() {
 
 	const [authenticatingUser, setAuthenticatingUser] = useState<TelegramAccount | null>(null)
 	const [submitting, setSubmitting] = useState<boolean>(false)
+	const modalInput = useState("")
 
 	const fetchUsers = useCallback(async () => {
 		if (failedToReachServer) return;
@@ -109,7 +110,11 @@ export default function AccountTableWithData() {
 					submitting={submitting}
 					isOpen={authenticatingUser !== null}
 					onClose={() => {onClose()}}
-					onValue={(value) => {onValueProvided(value)}}
+					onSubmit={(value) => {
+						modalInput[1]("")
+						onValueProvided(value)
+					}}
+					inputValue={modalInput}
 					user={authenticatingUser!}
 				/>
 				{users === null ? (
