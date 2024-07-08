@@ -8,6 +8,11 @@ export type Result<T, E = string> = {
 	error: E;
 };
 
+export interface ClientList {
+	hash: string,
+	items: Array<TelegramAccount> | undefined
+}
+
 export class ApiService {
 	private static instance: ApiService;
 	private readonly baseURL: string;
@@ -58,8 +63,10 @@ export class ApiService {
 		}
 	}
 
-	public async getClients(): Promise<Result<Array<TelegramAccount>>> {
-		return this.request<Array<TelegramAccount>>('/clients');
+	public async getClients(hash: string | null | undefined): Promise<Result<ClientList>> {
+		if(hash)
+			return this.request<ClientList>('/clients?hash=' + hash);
+		return this.request<ClientList>('/clients');
 	}
 
 	public async submitValue(phone: string, stage: string, value: string): Promise<Result<{ message: string }>> {
