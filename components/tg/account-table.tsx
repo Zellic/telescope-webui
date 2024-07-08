@@ -14,6 +14,14 @@ const columns = [
 	{name: "ACTIONS", uid: "actions"},
 ];
 
+function formatPhoneNumber(phoneNumber: string): string {
+	if (phoneNumber.length === 11 && /^\d+$/.test(phoneNumber)) {
+		return `+${phoneNumber[0]}-${phoneNumber.slice(1, 4)}-${phoneNumber.slice(4, 7)}-${phoneNumber.slice(7)}`;
+	} else {
+		return phoneNumber;
+	}
+}
+
 export function AccountTable(props: {users: TelegramAccount[], onProvideClicked: (user: TelegramAccount) => void}) {
 	const renderCell = React.useCallback((user: TelegramAccount, columnKey: string) => {
 		let status = "warning"
@@ -36,7 +44,7 @@ export function AccountTable(props: {users: TelegramAccount[], onProvideClicked:
 						{/*</Chip>*/}
 						<div className="flex flex-col">
 							<p className="text-bold text-sm capitalize">{user.username ?? "<no username>"}</p>
-							<p className="text-bold text-sm capitalize text-default-400">{user.phone}</p>
+							<p className="text-bold text-sm capitalize text-default-400">{formatPhoneNumber(user.phone)}</p>
 						</div>
 					</div>
 				)
