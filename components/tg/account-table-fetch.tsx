@@ -5,7 +5,7 @@ import { ApiService } from "@/components/api";
 import { TelegramAccount } from "@/components/tg/account-table-types";
 import { Spinner, Card } from "@nextui-org/react";
 import { CardBody } from "@nextui-org/card";
-import { useRepeatEveryForeground } from "@/components/hooks/useRepeat";
+import { useAsyncIntervalForeground } from "@/components/hooks/useRepeat";
 import ProvideModal from "@/components/tg/provide";
 
 export default function AccountTableWithData() {
@@ -36,9 +36,8 @@ export default function AccountTableWithData() {
 		}
 	}, [failedToReachServer]);
 
-	useRepeatEveryForeground(
-		// TODO: Important- these calls overlap if the server is responding slow, which it very well may do if Telegram is choking the async loop with data
-		{ interval: 5000, idle_interval: 60000, onMount: true },
+	useAsyncIntervalForeground(
+		5000,
 		fetchUsers,
 		[fetchUsers]
 	);
