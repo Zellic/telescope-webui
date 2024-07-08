@@ -13,7 +13,8 @@ export interface AuthenticationStatus {
 }
 
 export interface TelegramAccount {
+	name: string | null,
+	username: string | null,
 	phone: string;
-	username?: string;
 	status: AuthenticationStatus;
 }
