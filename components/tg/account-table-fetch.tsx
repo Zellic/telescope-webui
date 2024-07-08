@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { AccountTable } from "@/components/tg/account-table";
 import { ApiService } from "@/components/api";
 import { TelegramAccount } from "@/components/tg/account-table-types";
@@ -10,8 +10,11 @@ import ProvideModal from "@/components/tg/provide";
 
 export default function AccountTableWithData() {
 	const [users, setUsers] = useState<Array<TelegramAccount> | null>(null);
+	const userApiHash = useRef<string | null>(null)
+
 	const [isLoading, setIsLoading] = useState(false);
 	const [failedToReachServer, setFailedToReachServer] = useState(false);
+
 	const [authenticatingUser, setAuthenticatingUser] = useState<TelegramAccount | null>(null)
 	const [submitting, setSubmitting] = useState<boolean>(false)
 
@@ -21,9 +24,11 @@ export default function AccountTableWithData() {
 		setIsLoading(true);
 		try {
 			const apiService = ApiService.getInstance();
-			const clients = await apiService.getClients();
+			const clients = await apiService.getClients(userApiHash.current);
 			if(clients.success) {
-				setUsers(clients.data);
+				if(clients.data.hash !== userApiHash.current)
+					setUsers(clients.data.items!);
+				userApiHash.current = clients.data.hash
 			} else {
 				console.error(`Error fetching from server: ${clients.error}`)
 			}

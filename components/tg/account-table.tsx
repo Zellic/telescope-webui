@@ -43,7 +43,7 @@ export function AccountTable(props: {users: TelegramAccount[], onProvideClicked:
 						{/*	<CheckIcon className={"px-0"} />*/}
 						{/*</Chip>*/}
 						<div className="flex flex-col">
-							<p className="text-bold text-sm capitalize">{user.username ?? "<no username>"}</p>
+							<p className="text-bold text-sm capitalize">{user.username ?? user.name ?? "<no username>"}</p>
 							<p className="text-bold text-sm capitalize text-default-400">{formatPhoneNumber(user.phone)}</p>
 						</div>
 					</div>
