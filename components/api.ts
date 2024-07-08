@@ -78,4 +78,22 @@ export class ApiService {
 			body: JSON.stringify({ phone, stage, value }),
 		});
 	}
+
+	public async addAccount(
+		phoneNumber: string,
+		email: string | null,
+		comment: string | null
+	): Promise<Result<{ message: string }>> {
+		return this.request<{ message: string }>('/addtgaccount', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				phone_number: phoneNumber,
+				email,
+				comment
+			}),
+		});
+	}
 }

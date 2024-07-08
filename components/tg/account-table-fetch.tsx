@@ -7,6 +7,14 @@ import { Spinner, Card } from "@nextui-org/react";
 import { CardBody } from "@nextui-org/card";
 import { useAsyncIntervalForeground } from "@/components/hooks/useRepeat";
 import ProvideModal from "@/components/tg/provide";
+import { Button } from "@nextui-org/button";
+import AddAccountDialog, { AddAcountResult } from "@/components/tg/addaccount";
+
+enum AddAccountModalState {
+	CLOSED,
+	OPEN,
+	SUBMITTING,
+}
 
 export default function AccountTableWithData() {
 	const [users, setUsers] = useState<Array<TelegramAccount> | null>(null);
@@ -18,6 +26,8 @@ export default function AccountTableWithData() {
 	const [authenticatingUser, setAuthenticatingUser] = useState<TelegramAccount | null>(null)
 	const [submitting, setSubmitting] = useState<boolean>(false)
 	const modalInput = useState("")
+
+	const [addAccountModalState, setAddAccountModalState] = useState(AddAccountModalState.CLOSED)
 
 	const fetchUsers = useCallback(async () => {
 		if (failedToReachServer) return;
@@ -103,9 +113,29 @@ export default function AccountTableWithData() {
 		})()
 	}
 
+	async function onAddAccountSubmit(value: AddAcountResult) {
+		setAddAccountModalState(AddAccountModalState.SUBMITTING)
+		const result = await ApiService.getInstance().addAccount(value.phone, value.email, value.comment);
+
+		// TODO: idk handle errors somewhere anyone using this is a developer...
+		if(!result.success) {
+
+		}
+
+		setAddAccountModalState(AddAccountModalState.CLOSED)
+	}
+
 	return (
 		<>
-			<div>
+			{addAccountModalState === AddAccountModalState.CLOSED ? null : (
+				<AddAccountDialog
+					onClose={() => {setAddAccountModalState(AddAccountModalState.CLOSED)}}
+					onSubmit={(value) => {
+						onAddAccountSubmit(value)
+					}}
+				/>
+			)}
+			<div className="flex flex-col gap-4">
 				<ProvideModal
 					submitting={submitting}
 					isOpen={authenticatingUser !== null}
@@ -122,7 +152,13 @@ export default function AccountTableWithData() {
 						<CardBody>Waiting for data...</CardBody>
 					</Card>
 				) : (
-					<AccountTable users={users} onProvideClicked={onProvide} />
+					<>
+						<div className="flex gap-4 justify-between">
+							<span></span>
+							<Button size="sm" onClick={() => {setAddAccountModalState(AddAccountModalState.OPEN)}}>Add Account</Button>
+						</div>
+						<AccountTable users={users} onProvideClicked={onProvide} />
+					</>
 				)}
 			</div>
 			<div>
