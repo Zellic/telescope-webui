@@ -20,18 +20,28 @@ export class ApiService {
 	private constructor() {
 		const currentProtocol = window.location.protocol;  // 'http:' or 'https:'
 		const currentHostname = window.location.hostname;
-
 		const protocol = currentProtocol === 'https:' ? 'https' : 'http';
+		console.log({
+			currentProtocol,
+			currentHostname,
+			protocol,
+		})
 
 		if (currentHostname === 'localhost') {
+			console.log('a')
 			this.baseURL = `${protocol}://localhost:8888`;
 		} else {
 			const port = window.location.port;
 
-			if(port == '')
+			console.log({port})
+
+			if(port == '') {
+				console.log('b')
 				this.baseURL = `${protocol}://${currentHostname}`;
-			else
+			} else {
+				console.log('c')
 				this.baseURL = `${protocol}://${currentHostname}:${port}`;
+			}
 		}
 	}
 

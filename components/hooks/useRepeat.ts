@@ -8,14 +8,17 @@ type AsyncCallback = () => Promise<void>;
  * @param delay how often to call the callback
  * @param callback the async callback to be triggered
  * @param dependencies any React dependencies used within the callback
+ * @param immediate whether to run immediately on mount
  */
 export function useAsyncInterval(
 	delay: number,
 	callback: AsyncCallback,
-	dependencies: any[] = []
+	dependencies: any[] = [],
+	immediate: boolean = true
 ) {
 	const savedCallback = useRef<AsyncCallback>();
 	const isRunning = useRef(false);
+	const initialRunComplete = useRef(false);
 
 	useEffect(() => {
 		savedCallback.current = callback;
@@ -28,13 +31,27 @@ export function useAsyncInterval(
 				await savedCallback.current?.();
 			} finally {
 				isRunning.current = false;
+				initialRunComplete.current = true;
 			}
 		}
 	}, []);
 
+	// Run immediately on mount if immediate is true
+	useEffect(() => {
+		if (immediate) {
+			tick();
+		} else {
+			initialRunComplete.current = true;
+		}
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+
 	useEffect(() => {
 		if (delay !== null) {
-			const id = setInterval(tick, delay);
+			const id = setInterval(() => {
+				if (initialRunComplete.current) {
+					tick();
+				}
+			}, delay);
 			return () => clearInterval(id);
 		}
 	}, [delay, tick, ...dependencies]);
@@ -68,7 +85,8 @@ function useTabVisibility() {
 export function useAsyncIntervalForeground(
 	delay: number,
 	callback: AsyncCallback,
-	dependencies: any[] = []
+	dependencies: any[] = [],
+	immediate: boolean = true
 ) {
 	const isVisibleRef = useTabVisibility();
 
