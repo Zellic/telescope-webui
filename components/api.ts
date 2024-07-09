@@ -21,25 +21,17 @@ export class ApiService {
 		const currentProtocol = window.location.protocol;  // 'http:' or 'https:'
 		const currentHostname = window.location.hostname;
 		const protocol = currentProtocol === 'https:' ? 'https' : 'http';
-		console.log({
-			currentProtocol,
-			currentHostname,
-			protocol,
-		})
 
+		// when we're running the python server and the frontend separately we'll be on localhost
+		// thus the python backend is probably running on :8888
 		if (currentHostname === 'localhost') {
-			console.log('a')
 			this.baseURL = `${protocol}://localhost:8888`;
 		} else {
 			const port = window.location.port;
 
-			console.log({port})
-
 			if(port == '') {
-				console.log('b')
 				this.baseURL = `${protocol}://${currentHostname}`;
 			} else {
-				console.log('c')
 				this.baseURL = `${protocol}://${currentHostname}:${port}`;
 			}
 		}
