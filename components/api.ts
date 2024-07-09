@@ -18,17 +18,20 @@ export class ApiService {
 	private readonly baseURL: string;
 
 	private constructor() {
-		// Determine the backend base URL
 		const currentProtocol = window.location.protocol;  // 'http:' or 'https:'
 		const currentHostname = window.location.hostname;
 
-		// Use https if the current protocol is https
 		const protocol = currentProtocol === 'https:' ? 'https' : 'http';
 
 		if (currentHostname === 'localhost') {
 			this.baseURL = `${protocol}://localhost:8888`;
 		} else {
-			this.baseURL = `${protocol}://${currentHostname}`;
+			const port = window.location.port;
+
+			if(port == '')
+				this.baseURL = `${protocol}://${currentHostname}`;
+			else
+				this.baseURL = `${protocol}://${currentHostname}:${port}`;
 		}
 	}
 
