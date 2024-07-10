@@ -9,6 +9,7 @@ import { useAsyncIntervalForeground } from "@/components/hooks/useRepeat";
 import ProvideModal from "@/components/tg/provide";
 import { Button } from "@nextui-org/button";
 import AddAccountDialog, { AddAcountResult } from "@/components/tg/addaccount";
+import MessageModal from "@/components/messagebox";
 
 enum AddAccountModalState {
 	CLOSED,
@@ -28,6 +29,8 @@ export default function AccountTableWithData() {
 	const modalInput = useState("")
 
 	const [addAccountModalState, setAddAccountModalState] = useState(AddAccountModalState.CLOSED)
+
+	const [message, setMessage] = useState<{title: string, content: string} | null>(null)
 
 	const fetchUsers = useCallback(async () => {
 		if (failedToReachServer) return;
@@ -117,9 +120,8 @@ export default function AccountTableWithData() {
 		setAddAccountModalState(AddAccountModalState.SUBMITTING)
 		const result = await ApiService.getInstance().addAccount(value.phone, value.email, value.comment);
 
-		// TODO: idk handle errors somewhere anyone using this is a developer...
 		if(!result.success) {
-
+			setMessage({title: "Error", content: `Failed to add account: ${result.error}`})
 		}
 
 		setAddAccountModalState(AddAccountModalState.CLOSED)
@@ -136,6 +138,12 @@ export default function AccountTableWithData() {
 				/>
 			)}
 			<div className="flex flex-col gap-4">
+				<MessageModal
+					isOpen={message != null}
+					onClose={() => {setMessage(null)}}
+					title={message?.title ?? ""}
+					message={message?.content ?? ""}
+				/>
 				<ProvideModal
 					submitting={submitting}
 					isOpen={authenticatingUser !== null}
