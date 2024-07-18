@@ -3,13 +3,15 @@ import React, { useState, useCallback, useRef } from "react";
 import { AccountTable } from "@/components/tg/account-table";
 import { ApiService } from "@/components/api";
 import { TelegramAccount } from "@/components/tg/account-table-types";
-import { Spinner, Card } from "@nextui-org/react";
+import { Spinner, Card, Tooltip } from "@nextui-org/react";
 import { CardBody } from "@nextui-org/card";
 import { useAsyncIntervalForeground } from "@/components/hooks/useRepeat";
 import ProvideModal from "@/components/tg/provide";
 import { Button } from "@nextui-org/button";
 import AddAccountDialog, { AddAcountResult } from "@/components/tg/addaccount";
 import MessageModal from "@/components/messagebox";
+import { EyeIcon } from "@nextui-org/shared-icons";
+import { getElapsedTime } from "@/components/time";
 
 enum AddAccountModalState {
 	CLOSED,
@@ -165,7 +167,27 @@ export default function AccountTableWithData() {
 							<span></span>
 							<Button size="sm" onClick={() => {setAddAccountModalState(AddAccountModalState.OPEN)}}>Add Account</Button>
 						</div>
-						<AccountTable users={users} onProvideClicked={onProvide} />
+						<AccountTable
+							users={users}
+							onProvideClicked={onProvide}
+							renderActionButtons={(user) => {
+								return <>
+									<Tooltip content="Retrieve auth code">
+										<Button
+											isIconOnly
+											color="default"
+											aria-label="Retrieve auth code"
+											isDisabled={!user.lastCode}
+											onClick={() => {
+												setMessage({title: "Auth code", content: `As of ${getElapsedTime(user.lastCode!.date)} ago the login code is: ${user.lastCode!.value}`})
+											}}
+										>
+											<EyeIcon />
+										</Button>
+									</Tooltip>
+								</>
+							}}
+						/>
 					</>
 				)}
 			</div>
