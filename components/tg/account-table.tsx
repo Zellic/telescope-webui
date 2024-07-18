@@ -1,5 +1,5 @@
 "use client";
-import React, { Fragment } from "react";
+import React, { Fragment, ReactElement } from "react";
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, User, Chip, Tooltip, getKeyValue} from "@nextui-org/react";
 import { DeleteIcon, EditIcon, EyeIcon } from "@nextui-org/shared-icons";
 import { CheckIcon } from "@nextui-org/shared-icons";
@@ -26,7 +26,13 @@ function formatPhoneNumber(phoneNumber: string): string {
 	}
 }
 
-export function AccountTable(props: {users: TelegramAccount[], onProvideClicked: (user: TelegramAccount) => void}) {
+interface AccountTableParams {
+	users: TelegramAccount[];
+	onProvideClicked: (user: TelegramAccount) => void;
+	renderActionButtons: (user: TelegramAccount) => React.ReactNode;
+}
+
+export function AccountTable(props: AccountTableParams) {
 	const renderCell = React.useCallback((user: TelegramAccount, columnKey: string) => {
 		let status = "warning"
 		if(user.status.stage === "AuthorizationSuccess") {
@@ -76,11 +82,7 @@ export function AccountTable(props: {users: TelegramAccount[], onProvideClicked:
 			case "actions":
 				return (
 					<div className="relative flex items-center gap-2">
-						{/*<Tooltip content="Details">*/}
-						{/*	<span className="text-lg text-default-400 cursor-pointer active:opacity-50">*/}
-						{/*		<EyeIcon />*/}
-						{/*	</span>*/}
-						{/*</Tooltip>*/}
+						{props.renderActionButtons(user)}
 						{/*<Tooltip content="Edit user">*/}
 						{/*	<span className="text-lg text-default-400 cursor-pointer active:opacity-50">*/}
 						{/*		<EditIcon />*/}
