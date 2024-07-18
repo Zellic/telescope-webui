@@ -15,6 +15,7 @@ export interface AuthenticationStatus {
 export interface TelegramAccount {
 	name: string | null,
 	username: string | null,
-	phone: string;
-	status: AuthenticationStatus;
+	phone: string,
+	lastCode: null | {value: number, date: number},
+	status: AuthenticationStatus,
 }
