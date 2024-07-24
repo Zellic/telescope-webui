@@ -12,14 +12,15 @@ import {
 import { TelegramAccount } from "@/components/tg/account-table-types";
 import { Input } from "@nextui-org/input";
 
-type UseStateReturn<T> = [T, React.Dispatch<React.SetStateAction<T>>];
-
 interface ProvideModalParams {
 	submitting: boolean,
 	isOpen: boolean;
 	onClose: () => void;
 	onSubmit: (value: any) => void;
-	inputValue: UseStateReturn<string>,
+
+	value: string,
+	setValue: (s: string) => void,
+
 	user: TelegramAccount
 }
 
@@ -29,7 +30,17 @@ interface InputType {
 	label: string
 	placeholder: string
 
-	// todo: regex? validate code, etc?
+	maxLength?: number
+
+	/**
+	 * Matches any characters that should not be in this field.
+	 */
+	filter_regex?: RegExp
+
+	/**
+	 * return error message, or null if input okay
+	 */
+	validate: (str: string) => string | null
 }
 
 const validators: { [key: string]: InputType } = {
@@ -37,13 +48,22 @@ const validators: { [key: string]: InputType } = {
 		name: "PasswordRequired",
 		inputType: "text",
 		label: "Password",
-		placeholder: "Enter the account password"
+		placeholder: "Enter the account password",
+		filter_regex: /\S/g,
+		validate: (value) => {
+			return value.length > 0 ? null : "Cannot be empty."
+		}
 	},
 	"AuthCodeRequired": {
 		name: "AuthCodeRequired",
 		inputType: "text",
 		label: "Auth Code",
-		placeholder: "Enter the Telegram auth code"
+		placeholder: "Enter the Telegram auth code",
+		maxLength: 5,
+		filter_regex: /\D/g,
+		validate: (value) => {
+			return /^[0-9]{5}$/.test(value) ? null : "Auth code is exactly 5 digits."
+		}
 	},
 	// "EmailRequired": {
 	// 	name: "EmailRequired",
@@ -55,16 +75,26 @@ const validators: { [key: string]: InputType } = {
 		name: "EmailCodeRequired",
 		inputType: "text",
 		label: "E-mail code",
-		placeholder: "Enter code from email"
+		placeholder: "Enter code from email",
+		// idk what email codes are like...
+		filter_regex: /\S/g,
+		validate: (value) => {
+			return value.length > 0 ? null : "Must enter an email code."
+		}
 	},
 }
 
 export default function ProvideModal(props: ProvideModalParams) {
 	const {isOpen, onOpenChange} = useDisclosure({isOpen: props.isOpen});
-	const item = props.isOpen ? validators[props.user.status.stage] : null;
+	const type = props.isOpen ? validators[props.user.status.stage] : null;
 
 	function onSubmit(value: any) {
 		props.onSubmit(value);
+	}
+
+	let errorMsg: string | null = null;
+	if(type !== null && type?.validate !== null) {
+		errorMsg = type.validate(props.value);
 	}
 
 	return (
@@ -94,11 +124,24 @@ export default function ProvideModal(props: ProvideModalParams) {
 										<div>
 											<Input
 												isRequired={true}
-												type={item!.inputType}
-												label={item!.label}
-												placeholder={item!.placeholder}
-												value={props.inputValue[0]}
-												onValueChange={(newvalue) => {props.inputValue[1](newvalue)}}
+												type={type!.inputType}
+												label={type!.label}
+												placeholder={type!.placeholder}
+
+												maxLength={type?.maxLength}
+
+												isInvalid={errorMsg !== null}
+												color={errorMsg !== null ? "danger" : "success"}
+												errorMessage={errorMsg ?? ""}
+
+												value={props.value}
+												onValueChange={(newvalue) => {
+													if(type?.filter_regex) {
+														props.setValue(newvalue.replaceAll(type.filter_regex, ""))
+													} else {
+														props.setValue(newvalue)
+													}
+												}}
 											/>
 										</div>
 									</ModalBody>
@@ -106,7 +149,7 @@ export default function ProvideModal(props: ProvideModalParams) {
 										<Button color="danger" variant="light" onPress={onClose}>
 											Close
 										</Button>
-										<Button color="primary" onPress={() => {onSubmit(props.inputValue[0])}}>
+										<Button color="primary" onPress={() => {onSubmit(props.value)}}>
 											Submit
 										</Button>
 									</ModalFooter>
