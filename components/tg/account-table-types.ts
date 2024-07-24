@@ -5,11 +5,14 @@ export type AuthState =
 	| "EmailRequired"
 	| "EmailCodeRequired"
 	| "AuthorizationSuccess"
-	| "AuthorizationFailed";
+	| "ConnectionClosed"
+	| "ErrorOccurred";
 
 export interface AuthenticationStatus {
 	stage: AuthState;
 	inputRequired: boolean;
+	// only used for ErrorOccurred right now
+	error: string | null,
 }
 
 export interface TelegramAccount {

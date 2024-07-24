@@ -37,7 +37,7 @@ export function AccountTable(props: AccountTableParams) {
 		let status = "warning"
 		if(user.status.stage === "AuthorizationSuccess") {
 			status = "success";
-		} else if(user.status.stage === "AuthorizationFailed" || user.status.inputRequired === true) {
+		} else if(user.status.stage === "ConnectionClosed" || user.status.stage === "ErrorOccurred" || user.status.inputRequired === true) {
 			status = "danger"
 		}
 
@@ -72,7 +72,10 @@ export function AccountTable(props: AccountTableParams) {
 					</Chip>
 				)
 			case "authentication":
-				if(status === "success")
+				if(user.status.error !== null) {
+					return <p>{user.status.error}</p>
+				}
+				if(status === "success" || !user.status.inputRequired)
 					return null;
 				return (
 					<Button isLoading={status === "warning"} onClick={() => {props.onProvideClicked(user)}}>
