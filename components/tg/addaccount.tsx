@@ -62,7 +62,7 @@ export default function AddAccountDialog(props: AddAccountDialogProps) {
 												isRequired={true}
 												type="text"
 												label="Phone number"
-												placeholder="Enter  phone number..."
+												placeholder="Enter phone number..."
 												labelPlacement="outside"
 												maxLength={11}
 												pattern={"\d{11}"}

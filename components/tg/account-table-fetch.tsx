@@ -84,6 +84,7 @@ export default function AccountTableWithData() {
 			try {
 				const apiService = ApiService.getInstance();
 				setSubmitting(true)
+				const stage = authenticatingUser?.status.stage!
 				const submit = await apiService.submitValue(authenticatingUser?.phone!, authenticatingUser?.status.stage!, value);
 				await new Promise(r => setTimeout(r, 2000));
 				setSubmitting(false)
@@ -93,7 +94,7 @@ export default function AccountTableWithData() {
 						return
 
 					const updatedUsers = users.map(user => {
-						if (user.phone === authenticatingUser.phone) {
+						if (user.phone === authenticatingUser.phone && user.status.stage === stage) {
 							return {
 								...user,
 								status: {
