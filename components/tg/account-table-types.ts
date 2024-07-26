@@ -1,4 +1,5 @@
 export type AuthState =
+	| "ClientNotStarted"
 	| "WaitingOnServer"
 	| "PasswordRequired"
 	| "AuthCodeRequired"

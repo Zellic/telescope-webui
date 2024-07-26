@@ -9,8 +9,8 @@ import { useAsyncIntervalForeground } from "@/components/hooks/useRepeat";
 import ProvideModal from "@/components/tg/provide";
 import { Button } from "@nextui-org/button";
 import AddAccountDialog, { AddAcountResult } from "@/components/tg/addaccount";
-import MessageModal from "@/components/messagebox";
-import { EyeIcon } from "@nextui-org/shared-icons";
+import MessageModal, { MessageModalButton, MessageModalProps } from "@/components/messagebox";
+import { DeleteIcon, EllipsisIcon, EyeIcon } from "@nextui-org/shared-icons";
 import { getElapsedTime } from "@/components/time";
 
 enum AddAccountModalState {
@@ -32,7 +32,7 @@ export default function AccountTableWithData() {
 
 	const [addAccountModalState, setAddAccountModalState] = useState(AddAccountModalState.CLOSED)
 
-	const [message, setMessage] = useState<{title: string, content: string} | null>(null)
+	const [message, setMessage] = useState<Omit<MessageModalProps, 'isOpen'> | null>(null)
 
 	const fetchUsers = useCallback(async () => {
 		if (failedToReachServer) return;
@@ -124,10 +124,29 @@ export default function AccountTableWithData() {
 		const result = await ApiService.getInstance().addAccount(value.phone, value.email, value.comment);
 
 		if(!result.success) {
-			setMessage({title: "Error", content: `Failed to add account: ${result.error}`})
+			setMessageBasic(
+				"Error",
+				`Failed to add account: ${result.error}`,
+			)
 		}
 
 		setAddAccountModalState(AddAccountModalState.CLOSED)
+	}
+
+	function setMessageBasic(title: string, message: string) {
+		setMessage({
+			title: title,
+			message: message,
+			onClose: () => {setMessage(null)},
+			buttons: [
+				{
+					key: "okay",
+					label: "Okay",
+					color: "primary",
+					onPress: () => {setMessage(null)}
+				}
+			],
+		})
 	}
 
 	return (
@@ -143,9 +162,12 @@ export default function AccountTableWithData() {
 			<div className="flex flex-col gap-4">
 				<MessageModal
 					isOpen={message != null}
-					onClose={() => {setMessage(null)}}
-					title={message?.title ?? ""}
-					message={message?.content ?? ""}
+					{...(message !== null ? message : {
+						title: "",
+						message: "",
+						buttons: [],
+						onClose: () => {},
+					})}
 				/>
 				<ProvideModal
 					submitting={submitting}
@@ -181,12 +203,82 @@ export default function AccountTableWithData() {
 											aria-label="Retrieve auth code"
 											isDisabled={!user.lastCode}
 											onClick={() => {
-												setMessage({title: "Auth code", content: `As of ${getElapsedTime(user.lastCode!.date)} ago the login code is: ${user.lastCode!.value}`})
+												setMessageBasic(
+													"Auth code",
+													`As of ${getElapsedTime(user.lastCode!.date)} ago the login code is: ${user.lastCode!.value}`,
+												)
 											}}
 										>
 											<EyeIcon />
 										</Button>
 									</Tooltip>
+									{user.status.stage === "ClientNotStarted" ?
+										(
+											<Tooltip content="Connect">
+												<Button
+													isIconOnly
+													color="default"
+													aria-label="Connect"
+													onClick={() => {
+														ApiService.getInstance().connectClient(user.phone).then((result) => {
+															if(result.success) {
+																setMessageBasic("Success", `Connected account ${user.phone}.`)
+															} else {
+																setMessageBasic("Error", `Couldn't connect account ${user.phone}: ${result.error}`)
+															}
+														})
+													}}
+												>
+													<EllipsisIcon />
+												</Button>
+											</Tooltip>
+										)
+										:
+										(
+											<Tooltip content="Disconnect">
+												<Button
+													isIconOnly
+													color="default"
+													aria-label="Disconnect"
+													onClick={() => {
+														setMessage({
+															title: "Disconnect",
+															message: `Really disconnect ${user.phone}?`,
+															onClose: () => {setMessage(null)},
+															buttons: [
+																{
+																	key: "disconnect",
+																	label: "Disconnect",
+																	color: "danger",
+																	onPress: () => {
+																		setMessage(null)
+
+																		ApiService.getInstance().disconnectClient(user.phone).then((result) => {
+																			if(result.success) {
+																				setMessageBasic("Success", `Disconnected account ${user.phone}.`)
+																			} else {
+																				setMessageBasic("Error", `Couldn't disconnect account ${user.phone}: ${result.error}`)
+																			}
+																		})
+																	}
+																},
+																{
+																	key: "cancel",
+																	label: "Cancel",
+																	color: "default",
+																	onPress: () => {
+																		setMessage(null)
+																	}
+																}
+															],
+														})
+													}}
+												>
+													<DeleteIcon />
+												</Button>
+											</Tooltip>
+										)
+									}
 								</>
 							}}
 						/>
