@@ -49,7 +49,7 @@ const validators: { [key: string]: InputType } = {
 		inputType: "text",
 		label: "Password",
 		placeholder: "Enter the account password",
-		filter_regex: /\S/g,
+		filter_regex: /\s/g,
 		validate: (value) => {
 			return value.length > 0 ? null : "Cannot be empty."
 		}
@@ -77,7 +77,7 @@ const validators: { [key: string]: InputType } = {
 		label: "E-mail code",
 		placeholder: "Enter code from email",
 		// idk what email codes are like...
-		filter_regex: /\S/g,
+		filter_regex: /\s/g,
 		validate: (value) => {
 			return value.length > 0 ? null : "Must enter an email code."
 		}
