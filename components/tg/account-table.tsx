@@ -37,6 +37,8 @@ export function AccountTable(props: AccountTableParams) {
 		let status = "warning"
 		if(user.status.stage === "AuthorizationSuccess") {
 			status = "success";
+		} else if(user.status.stage === "ClientNotStarted") {
+			status = "default"
 		} else if(user.status.stage === "ConnectionClosed" || user.status.stage === "ErrorOccurred" || user.status.inputRequired === true) {
 			status = "danger"
 		}
