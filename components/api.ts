@@ -13,6 +13,10 @@ export interface ClientList {
 	items: Array<TelegramAccount> | undefined
 }
 
+export interface ConnectResult {
+	message: string
+}
+
 export class ApiService {
 	private static instance: ApiService;
 	private readonly baseURL: string;
@@ -72,6 +76,14 @@ export class ApiService {
 		if(hash)
 			return this.request<ClientList>('/clients?hash=' + hash);
 		return this.request<ClientList>('/clients');
+	}
+
+	public async connectClient(phone: string): Promise<Result<ConnectResult>> {
+		return this.request<ConnectResult>('/tgconnect?phone=' + phone);
+	}
+
+	public async disconnectClient(phone: string): Promise<Result<ConnectResult>> {
+		return this.request<ConnectResult>('/tgdisconnect?phone=' + phone);
 	}
 
 	public async submitValue(phone: string, stage: string, value: string): Promise<Result<{ message: string }>> {

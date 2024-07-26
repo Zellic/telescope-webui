@@ -9,11 +9,19 @@ import {
 	useDisclosure,
 } from "@nextui-org/react";
 
-interface MessageModalProps {
+export interface MessageModalButton {
+	key: string
+	label: string,
+	color: "default" | "primary" | "secondary" | "success" | "warning" | "danger" | undefined,
+	onPress: (key: string) => void,
+}
+
+export interface MessageModalProps {
 	isOpen: boolean;
-	onClose: () => void;
 	title: string;
 	message: string;
+	buttons: Array<MessageModalButton>,
+	onClose: () => void,
 }
 
 export default function MessageModal(props: MessageModalProps) {
@@ -29,9 +37,13 @@ export default function MessageModal(props: MessageModalProps) {
 							<p>{props.message}</p>
 						</ModalBody>
 						<ModalFooter>
-							<Button color="primary" onPress={onClose}>
-								Close
-							</Button>
+							{props.buttons.map(it => {
+								return (
+									<Button color={it.color} onPress={() => {it.onPress(it.key)}}>
+										{it.label}
+									</Button>
+								)
+							})}
 						</ModalFooter>
 					</>
 				)}
