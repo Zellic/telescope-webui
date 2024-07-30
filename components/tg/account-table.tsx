@@ -57,6 +57,8 @@ export function AccountTable(props: AccountTableParams) {
 						<div className="flex flex-col">
 							<p className="text-bold text-sm capitalize">{user.username ?? user.name ?? "<no username>"}</p>
 							<p className="text-bold text-sm capitalize text-default-400">{formatPhoneNumber(user.phone)}</p>
+							<p className="text-bold text-sm text-default-400">{user.email}</p>
+							<p className="text-bold text-sm text-default-400">{user.comment}</p>
 						</div>
 					</div>
 				)
