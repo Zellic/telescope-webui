@@ -13,14 +13,13 @@ export interface ClientList {
 	items: Array<TelegramAccount> | undefined
 }
 
-export interface ConnectResult {
+export interface MessageResult {
 	message: string
 }
 
 export class ApiService {
 	private static instance: ApiService;
 	private readonly baseURL: string;
-
 	private constructor() {
 		const currentProtocol = window.location.protocol;  // 'http:' or 'https:'
 		const currentHostname = window.location.hostname;
@@ -78,12 +77,16 @@ export class ApiService {
 		return this.request<ClientList>('/clients');
 	}
 
-	public async connectClient(phone: string): Promise<Result<ConnectResult>> {
-		return this.request<ConnectResult>('/tgconnect?phone=' + phone);
+	public async connectClient(phone: string): Promise<Result<MessageResult>> {
+		return this.request<MessageResult>('/tgconnect?phone=' + phone);
 	}
 
-	public async disconnectClient(phone: string): Promise<Result<ConnectResult>> {
-		return this.request<ConnectResult>('/tgdisconnect?phone=' + phone);
+	public async disconnectClient(phone: string): Promise<Result<MessageResult>> {
+		return this.request<MessageResult>('/tgdisconnect?phone=' + phone);
+	}
+
+	public async deleteaccount(phone: string): Promise<Result<MessageResult>> {
+		return this.request<MessageResult>('/deleteaccount?phone=' + phone);
 	}
 
 	public async submitValue(phone: string, stage: string, value: string): Promise<Result<{ message: string }>> {
