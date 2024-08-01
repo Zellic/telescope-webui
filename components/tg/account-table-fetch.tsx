@@ -10,8 +10,13 @@ import ProvideModal from "@/components/tg/provide";
 import { Button } from "@nextui-org/button";
 import AddAccountDialog, { AddAcountResult } from "@/components/tg/addaccount";
 import MessageModal, { MessageModalButton, MessageModalProps } from "@/components/messagebox";
-import { DeleteIcon, EllipsisIcon, EyeIcon } from "@nextui-org/shared-icons";
 import { getElapsedTime } from "@/components/time";
+import { VscDebugDisconnect } from "react-icons/vsc";
+import { MdDeleteForever, MdOutlineLogin } from "react-icons/md";
+import { EyeIcon } from "@nextui-org/shared-icons";
+import { TiMessageTyping } from "react-icons/ti";
+import { IconContext } from "react-icons";
+import DeleteModal from "@/components/deletemodal";
 
 enum AddAccountModalState {
 	CLOSED,
@@ -33,6 +38,7 @@ export default function AccountTableWithData() {
 	const [addAccountModalState, setAddAccountModalState] = useState(AddAccountModalState.CLOSED)
 
 	const [message, setMessage] = useState<Omit<MessageModalProps, 'isOpen'> | null>(null)
+	const [deleteModalUser, setDeleteModalUser] = useState<TelegramAccount | null>(null)
 
 	const fetchUsers = useCallback(async () => {
 		if (failedToReachServer) return;
@@ -160,6 +166,27 @@ export default function AccountTableWithData() {
 				/>
 			)}
 			<div className="flex flex-col gap-4">
+				<DeleteModal
+					isOpen={deleteModalUser != null}
+					user={deleteModalUser!}
+					onClose={() => {setDeleteModalUser(null)}}
+					onConfirmed={(user) => {
+						setDeleteModalUser(null);
+
+						(async function() {
+							const result = await ApiService.getInstance().deleteaccount(user.phone);
+
+							// TODO: this doesn't actually happen, it's async serverside. should probably change this?
+							// problem is client shutdown can take a bit...
+							if(!result.success) {
+								setMessageBasic(
+									"Error",
+									`Failed to delete account: ${result.error}`,
+								)
+							}
+						})()
+					}}
+				/>
 				<MessageModal
 					isOpen={message != null}
 					{...(message !== null ? message : {
@@ -195,7 +222,7 @@ export default function AccountTableWithData() {
 							users={users}
 							onProvideClicked={onProvide}
 							renderActionButtons={(user) => {
-								return <>
+								return <IconContext.Provider value={{size: '19px'}}>
 									<Tooltip content="Retrieve auth code">
 										<Button
 											isIconOnly
@@ -209,7 +236,7 @@ export default function AccountTableWithData() {
 												)
 											}}
 										>
-											<EyeIcon />
+											<TiMessageTyping />
 										</Button>
 									</Tooltip>
 									{user.status.stage === "ClientNotStarted" ?
@@ -229,7 +256,7 @@ export default function AccountTableWithData() {
 														})
 													}}
 												>
-													<EllipsisIcon />
+													<MdOutlineLogin />
 												</Button>
 											</Tooltip>
 										)
@@ -274,12 +301,24 @@ export default function AccountTableWithData() {
 														})
 													}}
 												>
-													<DeleteIcon />
+													<VscDebugDisconnect className="font-bold" />
 												</Button>
 											</Tooltip>
 										)
 									}
-								</>
+									<Tooltip content="Remove account from Telescope">
+										<Button
+											isIconOnly
+											color="danger"
+											aria-label="Remove account from Telescope"
+											onClick={() => {
+												setDeleteModalUser(user)
+											}}
+										>
+											<MdDeleteForever />
+										</Button>
+									</Tooltip>
+								</IconContext.Provider>
 							}}
 						/>
 					</>
