@@ -1,10 +1,9 @@
 "use client";
 import React, { Fragment, ReactElement } from "react";
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, User, Chip, Tooltip, getKeyValue} from "@nextui-org/react";
-import { DeleteIcon, EditIcon, EyeIcon } from "@nextui-org/shared-icons";
-import { CheckIcon } from "@nextui-org/shared-icons";
 import { TelegramAccount } from "@/components/tg/account-table-types";
 import { Button } from "@nextui-org/button";
+import UserCard from "@/components/usercard";
 
 const columns = [
 	{name: "NAME", uid: "name"},
@@ -13,18 +12,6 @@ const columns = [
 	{name: "AUTHENTICATION", uid: "authentication"},
 	{name: "ACTIONS", uid: "actions"},
 ];
-
-function formatPhoneNumber(phoneNumber: string): string {
-	if (phoneNumber.length === 11) {
-		return `+${phoneNumber[0]}-${phoneNumber.slice(1, 4)}-${phoneNumber.slice(4, 7)}-${phoneNumber.slice(7)}`;
-	} else if (phoneNumber.length === 10) {
-		return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6)}`;
-	} else if (phoneNumber.length === 7) {
-		return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
-	} else {
-		return phoneNumber;
-	}
-}
 
 interface AccountTableParams {
 	users: TelegramAccount[];
@@ -55,10 +42,7 @@ export function AccountTable(props: AccountTableParams) {
 						{/*	<CheckIcon className={"px-0"} />*/}
 						{/*</Chip>*/}
 						<div className="flex flex-col">
-							<p className="text-bold text-sm capitalize">{user.username ?? user.name ?? "<no username>"}</p>
-							<p className="text-bold text-sm capitalize text-default-400">{formatPhoneNumber(user.phone)}</p>
-							<p className="text-bold text-sm text-default-400">{user.email}</p>
-							<p className="text-bold text-sm text-default-400">{user.comment}</p>
+							<UserCard user={user} />
 						</div>
 					</div>
 				)
