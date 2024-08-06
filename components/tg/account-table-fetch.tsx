@@ -12,11 +12,12 @@ import AddAccountDialog, { AddAcountResult } from "@/components/tg/addaccount";
 import MessageModal, { MessageModalButton, MessageModalProps } from "@/components/messagebox";
 import { getElapsedTime } from "@/components/time";
 import { VscDebugDisconnect } from "react-icons/vsc";
-import { MdDeleteForever, MdOutlineLogin } from "react-icons/md";
+import { MdDeleteForever, MdModeEdit, MdOutlineLogin } from "react-icons/md";
 import { EyeIcon } from "@nextui-org/shared-icons";
 import { TiMessageTyping } from "react-icons/ti";
 import { IconContext } from "react-icons";
 import DeleteModal from "@/components/deletemodal";
+import EditPasswordModal from "@/components/passwordmodal";
 
 enum AddAccountModalState {
 	CLOSED,
@@ -24,6 +25,8 @@ enum AddAccountModalState {
 	SUBMITTING,
 }
 
+// TODO: This file is a feature creep mess with a bunch of modals that share similar functionality, and a god component with a ton of stuff in it.
+//       If we add more stuff to Telescope this really deserves to be refactored
 export default function AccountTableWithData() {
 	const [users, setUsers] = useState<Array<TelegramAccount> | null>(null);
 	const userApiHash = useRef<string | null>(null)
@@ -39,6 +42,7 @@ export default function AccountTableWithData() {
 
 	const [message, setMessage] = useState<Omit<MessageModalProps, 'isOpen'> | null>(null)
 	const [deleteModalUser, setDeleteModalUser] = useState<TelegramAccount | null>(null)
+	const [editPasswordModalUser, setEditPasswordModalUser] = useState<TelegramAccount | null>(null)
 
 	const fetchUsers = useCallback(async () => {
 		if (failedToReachServer) return;
@@ -187,6 +191,25 @@ export default function AccountTableWithData() {
 						})()
 					}}
 				/>
+				<EditPasswordModal
+					isOpen={editPasswordModalUser != null}
+					user={editPasswordModalUser!}
+					onClose={() => {setEditPasswordModalUser(null)}}
+					onSubmit={(user, password) => {
+						setEditPasswordModalUser(null);
+
+						(async function() {
+							// const result = await ApiService.getInstance().deleteaccount(user.phone);
+							//
+							// if(!result.success) {
+							// 	setMessageBasic(
+							// 		"Error",
+							// 		`Failed to edit account password for ${user.phone}: ${result.error}`,
+							// 	)
+							// }
+						})()
+					}}
+				/>
 				<MessageModal
 					isOpen={message != null}
 					{...(message !== null ? message : {
@@ -241,11 +264,11 @@ export default function AccountTableWithData() {
 									</Tooltip>
 									{user.status.stage === "ClientNotStarted" ?
 										(
-											<Tooltip content="Connect">
+											<Tooltip content="Connect Telegram session for this account">
 												<Button
 													isIconOnly
 													color="default"
-													aria-label="Connect"
+													aria-label="Connect Telegram session for this account"
 													onClick={() => {
 														ApiService.getInstance().connectClient(user.phone).then((result) => {
 															if(result.success) {
@@ -262,11 +285,11 @@ export default function AccountTableWithData() {
 										)
 										:
 										(
-											<Tooltip content="Disconnect">
+											<Tooltip content="Disconnect currently active Telegram session">
 												<Button
 													isIconOnly
 													color="default"
-													aria-label="Disconnect"
+													aria-label="Disconnect currently active Telegram session"
 													onClick={() => {
 														setMessage({
 															title: "Disconnect",
@@ -306,6 +329,17 @@ export default function AccountTableWithData() {
 											</Tooltip>
 										)
 									}
+									<Tooltip content="Edit account's 2FA password">
+										<Button
+											isIconOnly
+											aria-label="Edit account's 2FA password"
+											onClick={() => {
+												setEditPasswordModalUser(user)
+											}}
+										>
+											<MdModeEdit />
+										</Button>
+									</Tooltip>
 									<Tooltip content="Remove account from Telescope">
 										<Button
 											isIconOnly
