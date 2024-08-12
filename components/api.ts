@@ -89,6 +89,15 @@ export class ApiService {
 		return this.request<MessageResult>('/deleteaccount?phone=' + phone);
 	}
 
+	public async setpassword(phone: string, password: string): Promise<Result<MessageResult>> {
+		return this.request<{ message: string }>('/setpassword?phone=' + phone, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ password }),
+		});
+	}
 	public async submitValue(phone: string, stage: string, value: string): Promise<Result<{ message: string }>> {
 		return this.request<{ message: string }>('/submitvalue', {
 			method: 'POST',
