@@ -199,14 +199,14 @@ export default function AccountTableWithData() {
 						setEditPasswordModalUser(null);
 
 						(async function() {
-							// const result = await ApiService.getInstance().deleteaccount(user.phone);
-							//
-							// if(!result.success) {
-							// 	setMessageBasic(
-							// 		"Error",
-							// 		`Failed to edit account password for ${user.phone}: ${result.error}`,
-							// 	)
-							// }
+							const result = await ApiService.getInstance().setpassword(user.phone, password);
+
+							if(!result.success) {
+								setMessageBasic(
+									"Error",
+									`Failed to edit account password for ${user.phone}: ${result.error}`,
+								)
+							}
 						})()
 					}}
 				/>
