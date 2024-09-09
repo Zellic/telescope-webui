@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
 	Modal,
 	ModalContent,
@@ -11,6 +11,7 @@ import {
 } from "@nextui-org/react";
 import { Input } from "@nextui-org/input";
 import { Result } from "@/components/api";
+import { EnvironmentContext } from "@/components/providers/environment";
 
 export interface AddAccountDialogProps {
 	onClose: () => void;
@@ -35,6 +36,7 @@ export default function AddAccountDialog(props: AddAccountDialogProps) {
 	const [phoneNumber, setPhoneNumber] = useState("")
 	const [email, setEmail] = useState("")
 	const [comment, setComment] = useState("")
+	const { environment } = useContext(EnvironmentContext);
 
 	return (
 		<Modal isOpen={isOpen} isDismissable={!submitting} onOpenChange={onOpenChange} onClose={() => {props.onClose()}}>
