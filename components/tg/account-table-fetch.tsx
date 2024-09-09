@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useContext } from "react";
 import { AccountTable } from "@/components/tg/account-table";
 import { ApiService } from "@/components/api";
 import { TelegramAccount } from "@/components/tg/account-table-types";
@@ -18,6 +18,7 @@ import { TiMessageTyping } from "react-icons/ti";
 import { IconContext } from "react-icons";
 import DeleteModal from "@/components/deletemodal";
 import EditPasswordModal from "@/components/passwordmodal";
+import { EnvironmentContext } from "@/components/providers/environment";
 
 enum AddAccountModalState {
 	CLOSED,
@@ -43,6 +44,7 @@ export default function AccountTableWithData() {
 	const [message, setMessage] = useState<Omit<MessageModalProps, 'isOpen'> | null>(null)
 	const [deleteModalUser, setDeleteModalUser] = useState<TelegramAccount | null>(null)
 	const [editPasswordModalUser, setEditPasswordModalUser] = useState<TelegramAccount | null>(null)
+	const { environment, setEnvironment } = useContext(EnvironmentContext);
 
 	const fetchUsers = useCallback(async () => {
 		if (failedToReachServer) return;
@@ -50,6 +52,14 @@ export default function AccountTableWithData() {
 		setIsLoading(true);
 		try {
 			const apiService = ApiService.getInstance();
+
+			const environment = await apiService.environment();
+			if (environment.success) {
+				setEnvironment(environment.data)
+			} else {
+				console.error(`Error fetching environment status from server: ${environment.error}`)
+			}
+
 			const clients = await apiService.getClients(userApiHash.current);
 			if(clients.success) {
 				if(clients.data.hash !== userApiHash.current)
@@ -237,9 +247,41 @@ export default function AccountTableWithData() {
 					</Card>
 				) : (
 					<>
-						<div className="flex gap-4 justify-between">
-							<span></span>
+						<div className="flex ml-auto gap-4 justify-between">
 							<Button size="sm" onClick={() => {setAddAccountModalState(AddAccountModalState.OPEN)}}>Add Account</Button>
+							{environment.staging && <Button size="sm" 													onClick={() => {
+								setMessage({
+									title: "Add Test Account",
+									message: `Really add test acccount?`,
+									onClose: () => {setMessage(null)},
+									buttons: [
+										{
+											key: "yes",
+											label: "Yes",
+											color: "success",
+											onPress: () => {
+												setMessage(null)
+
+												ApiService.getInstance().addTestAccount().then((result) => {
+													if (result.success) {
+														setMessageBasic("Success", `Created test account.`)
+													} else {
+														setMessageBasic("Error", `Couldn't create test account: ${result.error}`)
+													}
+												})
+											}
+										},
+										{
+											key: "cancel",
+											label: "Cancel",
+											color: "default",
+											onPress: () => {
+												setMessage(null)
+											}
+										}
+									],
+								})
+							}}>Add Test Account</Button>}
 						</div>
 						<AccountTable
 							users={users}

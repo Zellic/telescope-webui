@@ -1,4 +1,5 @@
 import { TelegramAccount } from "@/components/tg/account-table-types";
+import { Environment } from "@/components/providers/environment";
 
 export type Result<T, E = string> = {
 	success: true;
@@ -124,5 +125,13 @@ export class ApiService {
 				comment
 			}),
 		});
+	}
+
+	public async addTestAccount(): Promise<Result<{ message: string }>> {
+		return this.request<MessageResult>('/addtestaccount');
+	}
+
+	public async environment(): Promise<Result<Environment>> {
+		return this.request<Environment>('/environment', {})
 	}
 }
