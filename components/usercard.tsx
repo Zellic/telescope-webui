@@ -19,6 +19,8 @@ export default function UserCard(props: {user: TelegramAccount}) {
 		<div className="flex flex-col">
 			<p className="text-bold text-sm">{user.username ?? user.name ?? "<no username>"}</p>
 			<p className="text-bold text-sm text-default-400">{formatPhoneNumber(user.phone)}</p>
+			{/* Phone numbers are only 10 characters long on staging (we ignore country codes on staging) */}
+			{user.phone.length === 10 && <p className="text-bold text-sm text-default-400">Code: {user.phone[5].repeat(5)}</p>}
 			<p className="text-bold text-sm text-default-400">{user.email}</p>
 			<p className="text-bold text-sm text-default-400">{user.comment}</p>
 		</div>
