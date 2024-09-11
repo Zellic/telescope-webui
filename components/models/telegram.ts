@@ -21,7 +21,7 @@ export const AuthenticationStatus = types.model({
 });
 
 export type IAuthenticationStatus = Instance<typeof AuthenticationStatus>;
-export type IAuthState = IAuthenticationStatus['stage'];
+export type IAuthStage = IAuthenticationStatus['stage'];
 
 export const TelegramAccount = types.model({
 	name: types.maybeNull(types.string),

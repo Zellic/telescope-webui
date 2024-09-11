@@ -1,7 +1,7 @@
 "use client";
 
 import { observer } from "mobx-react-lite";
-import { IAuthState, ITelegramAccount, useTelegramStore } from "@/components/models/telegram";
+import { IAuthStage, ITelegramAccount, useTelegramStore } from "@/components/models/telegram";
 import { Chip, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react";
 import { formatPhoneNumber } from "@/components/tg-mobx/utils";
 import React from "react";
