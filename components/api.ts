@@ -1,5 +1,5 @@
-import { TelegramAccount } from "@/components/tg/account-table-types";
 import { Environment } from "@/components/providers/environment";
+import { ITelegramAccount } from "@/components/models/telegram";
 
 export type Result<T, E = string> = {
 	success: true;
@@ -11,7 +11,7 @@ export type Result<T, E = string> = {
 
 export interface ClientList {
 	hash: string,
-	items: Array<TelegramAccount> | undefined
+	items: Array<ITelegramAccount> | undefined
 }
 
 export interface MessageResult {

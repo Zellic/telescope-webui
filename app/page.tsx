@@ -1,8 +1,13 @@
-import React from "react";
-import AccountTableWithData from "@/components/tg/account-table-fetch";
+'use client';
 
-export default function App() {
+import React from "react";
+import TelegramAccountManager from "@/components/tg-mobx/account-manager";
+import { observer } from "mobx-react-lite";
+
+const App = observer(() => {
 	return (
-		<AccountTableWithData />
-	);
-}
+		<TelegramAccountManager />
+	)
+})
+
+export default App;

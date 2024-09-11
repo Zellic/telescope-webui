@@ -7,6 +7,7 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { ThemeProviderProps } from "next-themes/dist/types";
 import { DefaultEnvironment, EnvironmentContext } from "@/components/providers/environment";
 import { useState } from "react";
+import { MobxStoreProvider } from "@/components/providers/mobx";
 
 export interface ProvidersProps {
 	children: React.ReactNode;
@@ -20,8 +21,10 @@ export function Providers({ children, themeProps }: ProvidersProps) {
 	return (
 		<NextUIProvider navigate={router.push}>
 			<NextThemesProvider {...themeProps}>
-				<EnvironmentContext.Provider value={{environment, setEnvironment}}>
-					{children}
+				<EnvironmentContext.Provider value={{ environment, setEnvironment }}>
+					<MobxStoreProvider>
+						{children}
+					</MobxStoreProvider>
 				</EnvironmentContext.Provider>
 			</NextThemesProvider>
 		</NextUIProvider>
