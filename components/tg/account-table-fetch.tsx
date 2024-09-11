@@ -2,7 +2,6 @@
 import React, { useState, useCallback, useRef, useContext } from "react";
 import { AccountTable } from "@/components/tg/account-table";
 import { ApiService } from "@/components/api";
-import { TelegramAccount } from "@/components/tg/account-table-types";
 import { Spinner, Card, Tooltip } from "@nextui-org/react";
 import { CardBody } from "@nextui-org/card";
 import { useAsyncIntervalForeground } from "@/components/hooks/useRepeat";
@@ -19,6 +18,7 @@ import { IconContext } from "react-icons";
 import DeleteModal from "@/components/deletemodal";
 import EditPasswordModal from "@/components/passwordmodal";
 import { EnvironmentContext } from "@/components/providers/environment";
+import { ITelegramAccount } from "@/components/models/telegram";
 
 enum AddAccountModalState {
 	CLOSED,
@@ -29,21 +29,21 @@ enum AddAccountModalState {
 // TODO: This file is a feature creep mess with a bunch of modals that share similar functionality, and a god component with a ton of stuff in it.
 //       If we add more stuff to Telescope this really deserves to be refactored
 export default function AccountTableWithData() {
-	const [users, setUsers] = useState<Array<TelegramAccount> | null>(null);
+	const [users, setUsers] = useState<Array<ITelegramAccount> | null>(null);
 	const userApiHash = useRef<string | null>(null)
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [failedToReachServer, setFailedToReachServer] = useState(false);
 
-	const [authenticatingUser, setAuthenticatingUser] = useState<TelegramAccount | null>(null)
+	const [authenticatingUser, setAuthenticatingUser] = useState<ITelegramAccount | null>(null)
 	const [submitting, setSubmitting] = useState<boolean>(false)
 	const [provideValue, setProvideValue] = useState("")
 
 	const [addAccountModalState, setAddAccountModalState] = useState(AddAccountModalState.CLOSED)
 
 	const [message, setMessage] = useState<Omit<MessageModalProps, 'isOpen'> | null>(null)
-	const [deleteModalUser, setDeleteModalUser] = useState<TelegramAccount | null>(null)
-	const [editPasswordModalUser, setEditPasswordModalUser] = useState<TelegramAccount | null>(null)
+	const [deleteModalUser, setDeleteModalUser] = useState<ITelegramAccount | null>(null)
+	const [editPasswordModalUser, setEditPasswordModalUser] = useState<ITelegramAccount | null>(null)
 	const { environment, setEnvironment } = useContext(EnvironmentContext);
 
 	const fetchUsers = useCallback(async () => {
@@ -91,7 +91,7 @@ export default function AccountTableWithData() {
 		);
 	}
 
-	function onProvide(user: TelegramAccount) {
+	function onProvide(user: ITelegramAccount) {
 		setAuthenticatingUser(user)
 	}
 
