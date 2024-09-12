@@ -1,5 +1,5 @@
-import { Environment } from "@/components/providers/environment";
 import { ITelegramAccount } from "@/components/models/telegram";
+import { IEnvironment } from "@/components/models/environment";
 
 export type Result<T, E = string> = {
 	success: true;
@@ -131,7 +131,7 @@ export class ApiService {
 		return this.request<MessageResult>('/addtestaccount');
 	}
 
-	public async environment(): Promise<Result<Environment>> {
-		return this.request<Environment>('/environment', {})
+	public async environment(): Promise<Result<IEnvironment>> {
+		return this.request<IEnvironment>('/environment', {})
 	}
 }

@@ -26,7 +26,6 @@ import {
   Logo,
 } from "@/components/icons";
 import { useContext } from "react";
-import { EnvironmentContext } from "@/components/providers/environment";
 
 export const Navbar = () => {
   const searchInput = (
