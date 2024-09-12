@@ -4,8 +4,8 @@ import { observer } from "mobx-react-lite";
 import { useTelegramStore } from "@/components/models/telegram";
 import { useAsyncIntervalForeground } from "@/components/hooks/useRepeat";
 import TelegramAccountTable from "@/components/tg-mobx/account-table";
-import { useEffect } from "react";
 import { Spinner } from "@nextui-org/react";
+import { ProvideModal } from "@/components/tg-mobx/modals/provide";
 
 const TelegramAccountManager = observer(() => {
 	const telegramStore = useTelegramStore();
@@ -14,12 +14,14 @@ const TelegramAccountManager = observer(() => {
 		5000,
 		async () => {
 			await telegramStore.fetchClients();
+			await telegramStore.fetchEnvironment();
 		},
 		[telegramStore]
 	);
 
 	return (
 		<>
+			<ProvideModal />
 			<TelegramAccountTable />
 			{telegramStore.state === "pending" && <Spinner />}
 		</>
