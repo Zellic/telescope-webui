@@ -1,8 +1,9 @@
 "use client";
 
-import { flow, Instance, onSnapshot, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
+import { flow, Instance, onSnapshot, types } from "mobx-state-tree";
 import { createContext, useContext } from "react";
 import { ApiService } from "@/components/api";
+import { defaultEnvironment, Environment } from "@/components/models/environment";
 
 export const AuthenticationStatus = types.model({
 	stage: types.enumeration("AuthState", [
@@ -21,7 +22,7 @@ export const AuthenticationStatus = types.model({
 });
 
 export type IAuthenticationStatus = Instance<typeof AuthenticationStatus>;
-export type IAuthStage = IAuthenticationStatus['stage'];
+export type IAuthStage = IAuthenticationStatus["stage"];
 
 export const TelegramAccount = types.model({
 	name: types.maybeNull(types.string),
@@ -46,26 +47,20 @@ export type ITelegramAccount = Instance<typeof TelegramAccount>;
 const TelegramModel = types
 	.model({
 		clients: types.array(TelegramAccount),
+		state: types.enumeration("State", ["pending", "done", "error"]),
+		environment: Environment,
+		//
 		userApiHash: types.maybeNull(types.string),
-		state: types.enumeration("State", ["pending", "done", "error"])
+		authenticatingClient: types.maybeNull(types.reference(TelegramAccount, {
+			get(identifier: string, parent: any /* RootStore */) {
+				return parent.clients.find((u: any) => u.phone === identifier);
+			},
+			set(value) {
+				return value.phone;
+			}
+		}))
 	})
 	.actions(self => {
-		function addTelegramAccount(name: string | null, username: string | null, email: string | null, comment: string | null,
-		                                    phone: string, lastCode: {
-				value: number,
-				date: number
-			} | null, status: IAuthenticationStatus) {
-			self.clients.push(TelegramAccount.create({
-				name,
-				username,
-				email,
-				comment,
-				phone,
-				lastCode,
-				status: AuthenticationStatus.create(status)
-			}))
-		}
-
 		const fetchClients = flow(function* () {
 			// note: we don't reset the state to 'pending' as our default state is pending
 			//       and we don't want to show a spinner on every client fetch (this should happen
@@ -76,27 +71,45 @@ const TelegramModel = types
 				const apiService = ApiService.getInstance();
 				const clients = yield apiService.getClients(self.userApiHash);
 
-				if(clients.success) {
-					if(clients.data.hash !== self.userApiHash) {
+				if (clients.success) {
+					if (clients.data.hash !== self.userApiHash) {
 						self.clients = clients.data.items || [];
 					}
 
-					self.userApiHash = clients.data.hash
-					self.state = 'done'
+					self.userApiHash = clients.data.hash;
+					self.state = "done";
 				} else {
-					console.error(`Error fetching from server: ${clients.error}`)
-					self.state = 'error'
+					console.error(`Error fetching from server: ${clients.error}`);
+					self.state = "error";
 				}
 			} catch (error) {
-				console.error(`Failed to fetch clients: ${error}`)
-				self.state = 'error'
+				console.error(`Failed to fetch clients: ${error}`);
+				self.state = "error";
 			}
-		})
+		});
+
+		const fetchEnvironment = flow(function* () {
+			try {
+				const apiService = ApiService.getInstance();
+				const environment = yield apiService.environment();
+				if (environment.success) {
+					self.environment = environment.data;
+				}
+			} catch (error) {
+				console.error(`Failed to fetch environment: ${error}`);
+			}
+		});
+
+		function setAuthenticatingClient(client: ITelegramAccount | null) {
+			self.authenticatingClient = client;
+		}
 
 		return {
-			fetchClients
-		}
-	})
+			fetchClients,
+			fetchEnvironment,
+			setAuthenticatingClient
+		};
+	});
 
 /* TODO: maybe we should look into having one root store, to contain more models... */
 /*       also maybe create a UI store. its said on the mobx website this is good practice */
@@ -104,7 +117,8 @@ const TelegramModel = types
 /*       performance wise one big store or multiple small stores is irrelevant just a design choice */
 export const telegramStore = TelegramModel.create({
 	clients: [],
-	state: 'pending',
+	state: "pending",
+	environment: defaultEnvironment
 });
 
 export type TelegramInstance = Instance<typeof TelegramModel>;
@@ -121,5 +135,5 @@ export function useTelegramStore() {
 }
 
 onSnapshot(telegramStore, (snapshot) => {
-	console.log('snapshot',snapshot)
-})
+	console.log("snapshot", snapshot);
+});

@@ -1,9 +1,9 @@
 "use client";
 
 import { observer } from "mobx-react-lite";
-import { IAuthStage, ITelegramAccount, useTelegramStore } from "@/components/models/telegram";
+import { ITelegramAccount, useTelegramStore } from "@/components/models/telegram";
 import { Chip, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react";
-import { formatPhoneNumber } from "@/components/tg-mobx/utils";
+import { formatPhoneNumber, stageToStatus } from "@/components/tg-mobx/utils";
 import React from "react";
 import { Button } from "@nextui-org/button";
 import { ActionButtons } from "@/components/tg-mobx/action-buttons";
@@ -24,20 +24,6 @@ function NameCell({ account }: AccountCell) {
 	);
 }
 
-
-function stageToStatus(account: ITelegramAccount) {
-	let status = "warning"
-	if(account.status.stage === "AuthorizationSuccess") {
-		status = "success";
-	} else if(account.status.stage === "ClientNotStarted") {
-		status = "default"
-	} else if(account.status.stage === "ConnectionClosed" || account.status.stage === "ErrorOccurred" || account.status.inputRequired === true) {
-		status = "danger"
-	}
-
-	return status;
-}
-
 function StatusCell({ account }: AccountCell) {
 	const status = stageToStatus(account)
 
@@ -48,7 +34,8 @@ function StatusCell({ account }: AccountCell) {
 	);
 }
 
-function AuthenticationCell({ account }: AccountCell) {
+const AuthenticationCell = observer(({account}: AccountCell) => {
+	const telegramStore = useTelegramStore();
 	const status = stageToStatus(account)
 
 	if (account.status.error !== null) {
@@ -60,12 +47,12 @@ function AuthenticationCell({ account }: AccountCell) {
 
 	return (
 		<Button isLoading={status === "warning"} onClick={() => {
-			// props.onProvideClicked(user);
+			telegramStore.setAuthenticatingClient(account);
 		}}>
 			Provide
 		</Button>
 	);
-}
+})
 
 function ActionsCell({ account }: AccountCell) {
 	return (
