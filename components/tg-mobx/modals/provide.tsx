@@ -81,6 +81,7 @@ export const ProvideModal = observer(() => {
 
 	const onClose = () => {
 		telegramStore.setAuthenticatingClient(null);
+		setValue("");
 	};
 
 	return (
