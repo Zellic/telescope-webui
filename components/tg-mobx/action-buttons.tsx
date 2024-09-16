@@ -7,7 +7,8 @@ import { ApiService } from "@/components/api";
 import { MdDeleteForever, MdModeEdit, MdOutlineLogin } from "react-icons/md";
 import { VscDebugDisconnect } from "react-icons/vsc";
 import React from "react";
-import { IAuthStage, ITelegramAccount } from "@/components/models/telegram";
+import { ITelegramAccount, useTelegramStore } from "@/components/models/telegram";
+import { observer } from "mobx-react-lite";
 
 interface TooltipButtonProps {
 	content: string,
@@ -35,18 +36,20 @@ function TooltipButton(props: TooltipButtonProps) {
 	);
 }
 
-export function StageButtons({ account }: { account: ITelegramAccount }) {
+export const StageButtons = observer(({ account }: { account: ITelegramAccount }) => {
+	const telegramStore = useTelegramStore();
+
 	if (account.status.stage === "ClientNotStarted") {
 		return (
 			<TooltipButton content={"Connect Telegram session for this account"}
 			               icon={MdOutlineLogin}
 			               onClick={() => {
 				               ApiService.getInstance().connectClient(account.phone).then((result) => {
-					               // if (result.success) {
-					               // 	setMessageBasic("Success", `Connected account ${account.phone}.`);
-					               // } else {
-					               // 	setMessageBasic("Error", `Couldn't connect account ${account.phone}: ${result.error}`);
-					               // }
+					               if (result.success) {
+						               telegramStore.setMessageBasic("Success", `Connected account ${account.phone}.`);
+					               } else {
+						               telegramStore.setMessageBasic("Error", `Couldn't connect account ${account.phone}: ${result.error}`);
+					               }
 				               });
 			               }} />
 		);
@@ -55,55 +58,38 @@ export function StageButtons({ account }: { account: ITelegramAccount }) {
 			<TooltipButton content={"Disconnect currently active Telegram session"}
 			               icon={VscDebugDisconnect} iconClass={"font-bold"}
 			               onClick={() => {
-				               // setMessage({
-				               // 	title: "Disconnect",
-				               // 	message: `Really disconnect ${account.phone}?`,
-				               // 	onClose: () => {
-				               // 		setMessage(null);
-				               // 	},
-				               // 	buttons: [
-				               // 		{
-				               // 			key: "disconnect",
-				               // 			label: "Disconnect",
-				               // 			color: "danger",
-				               // 			onPress: () => {
-				               // 				setMessage(null);
-				               //
-				               // 				ApiService.getInstance().disconnectClient(account.phone).then((result) => {
-				               // 					if (result.success) {
-				               // 						setMessageBasic("Success", `Disconnected account ${account.phone}.`);
-				               // 					} else {
-				               // 						setMessageBasic("Error", `Couldn't disconnect account ${account.phone}: ${result.error}`);
-				               // 					}
-				               // 				});
-				               // 			}
-				               // 		},
-				               // 		{
-				               // 			key: "cancel",
-				               // 			label: "Cancel",
-				               // 			color: "default",
-				               // 			onPress: () => {
-				               // 				setMessage(null);
-				               // 			}
-				               // 		}
-				               // 	]
-				               // });
+				               telegramStore.setMessage("Disconnect", `Really disconnect ${account.phone}?`, [
+					               {
+						               key: "disconnect",
+						               label: "Disconnect",
+						               color: "danger",
+						               actionType: "disconnect"
+					               },
+					               {
+						               key: "cancel",
+						               label: "Cancel",
+						               color: "default",
+						               actionType: "default"
+					               }
+				               ], account);
 			               }} />
 		);
 	}
-}
+});
 
-export function ActionButtons({ account }: { account: ITelegramAccount }) {
+export const ActionButtons = observer(({ account }: { account: ITelegramAccount }) => {
+	const telegramStore = useTelegramStore();
+
 	return (
 		<IconContext.Provider value={{ size: "19px" }}>
 			<TooltipButton content={"Retrieve auth code"}
 			               icon={TiMessageTyping}
 			               disabled={!account.lastCode}
 			               onClick={() => {
-				               // setMessageBasic(
-				               // 	"Auth code",
-				               // 	`As of ${getElapsedTime(account.lastCode!.date)} ago the login code is: ${account.lastCode!.value}`
-				               // );
+				               telegramStore.setMessageBasic(
+					               "Auth code",
+					               `As of ${getElapsedTime(account.lastCode!.date)} ago the login code is: ${account.lastCode!.value}`
+				               );
 			               }} />
 
 			<StageButtons account={account} />
@@ -122,4 +108,4 @@ export function ActionButtons({ account }: { account: ITelegramAccount }) {
 
 		</IconContext.Provider>
 	);
-}
+});
