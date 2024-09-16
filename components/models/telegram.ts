@@ -44,11 +44,43 @@ export const TelegramAccount = types.model({
 
 export type ITelegramAccount = Instance<typeof TelegramAccount>;
 
+const ModalButtonActionType = types.enumeration("ActionType", ["default", "disconnect"]);
+export type IModalButtonActionType = Instance<typeof ModalButtonActionType>;
+
+const MessageModalButton = types.model({
+	key: types.string,
+	label: types.string,
+	color: types.maybeNull(types.enumeration("Color", [
+		"default", "primary", "secondary", "success", "warning", "danger"
+	])),
+	actionType: ModalButtonActionType
+});
+
+export type IMessageModalButton = Instance<typeof MessageModalButton>;
+
+const MessageModal = types.model({
+	title: types.string,
+	message: types.string,
+	buttons: types.array(MessageModalButton)
+});
+
+export type IMessageModal = Instance<typeof MessageModal>;
+
 const TelegramModel = types
 	.model({
 		clients: types.array(TelegramAccount),
 		state: types.enumeration("State", ["pending", "done", "error"]),
 		environment: Environment,
+		//
+		message: types.maybeNull(MessageModal),
+		messageClient: types.maybeNull(types.reference(TelegramAccount, {
+			get(identifier: string, parent: any /* RootStore */) {
+				return parent.clients.find((u: any) => u.phone === identifier);
+			},
+			set(value) {
+				return value.phone;
+			}
+		})),
 		//
 		userApiHash: types.maybeNull(types.string),
 		authenticatingClient: types.maybeNull(types.reference(TelegramAccount, {
@@ -104,10 +136,41 @@ const TelegramModel = types
 			self.authenticatingClient = client;
 		}
 
+		function setMessage(title: string, message: string, buttons: Array<IMessageModalButton>, client?: ITelegramAccount) {
+			self.message = MessageModal.create({
+				title,
+				message,
+				buttons
+			});
+			self.messageClient = client || null;
+		}
+
+		function setMessageBasic(title: string, message: string, client?: ITelegramAccount) {
+			self.message = MessageModal.create({
+				title,
+				message,
+				buttons: [{
+					key: "okay",
+					label: "Okay",
+					color: "primary",
+					actionType: "default"
+				}]
+			});
+			self.messageClient = client || null;
+		}
+
+		function clearMessage() {
+			self.message = null;
+			self.messageClient = null;
+		}
+
 		return {
 			fetchClients,
 			fetchEnvironment,
-			setAuthenticatingClient
+			setAuthenticatingClient,
+			setMessage,
+			setMessageBasic,
+			clearMessage
 		};
 	});
 
