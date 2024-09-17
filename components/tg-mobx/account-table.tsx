@@ -10,7 +10,7 @@ import { ActionButtons } from "@/components/tg-mobx/action-buttons";
 
 type AccountCell = { account: ITelegramAccount }
 
-function NameCell({ account }: AccountCell) {
+export const NameCell = observer(({ account }: AccountCell) => {
 	return (
 		<div className="flex flex-col">
 			<p className="text-bold text-sm">{account.username ?? account.name ?? "<no username>"}</p>
@@ -22,21 +22,21 @@ function NameCell({ account }: AccountCell) {
 			<p className="text-bold text-sm text-default-400">{account.comment}</p>
 		</div>
 	);
-}
+});
 
-function StatusCell({ account }: AccountCell) {
-	const status = stageToStatus(account)
+const StatusCell = observer(({ account }: AccountCell) => {
+	const status = stageToStatus(account);
 
 	return (
 		<Chip className="capitalize" color={status as any} size="sm" variant="flat">
 			{account.status.stage}
 		</Chip>
 	);
-}
+});
 
-const AuthenticationCell = observer(({account}: AccountCell) => {
+const AuthenticationCell = observer(({ account }: AccountCell) => {
 	const telegramStore = useTelegramStore();
-	const status = stageToStatus(account)
+	const status = stageToStatus(account);
 
 	if (account.status.error !== null) {
 		return <p>{account.status.error}</p>;
@@ -52,15 +52,15 @@ const AuthenticationCell = observer(({account}: AccountCell) => {
 			Provide
 		</Button>
 	);
-})
+});
 
-function ActionsCell({ account }: AccountCell) {
+const ActionsCell = observer(({ account }: AccountCell) => {
 	return (
 		<div className="relative flex items-center gap-2">
 			<ActionButtons account={account} />
 		</div>
 	);
-}
+});
 
 const columns = [
 	{ name: "NAME", uid: "name" },
