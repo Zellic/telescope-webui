@@ -97,13 +97,13 @@ export const ActionButtons = observer(({ account }: { account: ITelegramAccount 
 			<TooltipButton content={"Edit account's 2FA password"}
 			               icon={MdModeEdit}
 			               onClick={() => {
-				               // setEditPasswordModalUser(account);
+				               telegramStore.setPasswordEditingClient(account);
 			               }} />
 
 			<TooltipButton content={"Remove account from Telescope"}
 			               icon={MdDeleteForever} color={"danger"}
 			               onClick={() => {
-				               // setDeleteModalUser(account);
+				               telegramStore.setDeleteClient(account);
 			               }} />
 
 		</IconContext.Provider>

@@ -15,23 +15,23 @@ const SECONDS_IN_MONTH = SECONDS_IN_DAY * DAYS_IN_MONTH;
 const SECONDS_IN_YEAR = SECONDS_IN_MONTH * MONTHS_IN_YEAR;
 
 const TIME_UNITS: TimeUnit[] = [
-	{ unit: 'year', seconds: SECONDS_IN_YEAR },
-	{ unit: 'month', seconds: SECONDS_IN_MONTH },
-	{ unit: 'day', seconds: SECONDS_IN_DAY },
-	{ unit: 'hour', seconds: SECONDS_IN_HOUR },
-	{ unit: 'minute', seconds: SECONDS_IN_MINUTE },
-	{ unit: 'second', seconds: 1 }
+	{ unit: "year", seconds: SECONDS_IN_YEAR },
+	{ unit: "month", seconds: SECONDS_IN_MONTH },
+	{ unit: "day", seconds: SECONDS_IN_DAY },
+	{ unit: "hour", seconds: SECONDS_IN_HOUR },
+	{ unit: "minute", seconds: SECONDS_IN_MINUTE },
+	{ unit: "second", seconds: 1 }
 ];
 
 export function formatDuration(seconds: number): string {
 	for (const { unit, seconds: unitSeconds } of TIME_UNITS) {
 		if (seconds >= unitSeconds) {
 			const count = Math.floor(seconds / unitSeconds);
-			return `${count} ${unit}${count !== 1 ? 's' : ''}`;
+			return `${count} ${unit}${count !== 1 ? "s" : ""}`;
 		}
 	}
 
-	return '0 seconds';
+	return "0 seconds";
 }
 
 export function getElapsedTime(timestamp: number): string {

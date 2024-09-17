@@ -5,8 +5,10 @@ import { useTelegramStore } from "@/components/models/telegram";
 import { useAsyncIntervalForeground } from "@/components/hooks/useRepeat";
 import TelegramAccountTable from "@/components/tg-mobx/account-table";
 import { Spinner } from "@nextui-org/react";
-import { ProvideModal } from "@/components/tg-mobx/modals/provide";
-import { MessageModal } from "@/components/tg-mobx/modals/message";
+import { Modals } from "@/components/tg-mobx/modals/modals";
+import { Button } from "@nextui-org/button";
+import React from "react";
+
 
 const TelegramAccountManager = observer(() => {
 	const telegramStore = useTelegramStore();
@@ -22,10 +24,37 @@ const TelegramAccountManager = observer(() => {
 
 	return (
 		<>
-			<MessageModal />
-			<ProvideModal />
-			<TelegramAccountTable />
-			{telegramStore.state === "pending" && <Spinner />}
+			<div className="flex flex-col gap-4">
+				<Modals />
+
+				<div className="flex ml-auto gap-4 justify-between">
+					<Button size="sm" onClick={() => {
+						telegramStore.setAddAccountModal(true);
+					}}>Add Account</Button>
+
+					{telegramStore.environment.staging &&
+                      <Button size="sm" onClick={() => {
+						  telegramStore.setMessage("Add Test Account", "Really add test acccount?", [
+							  {
+								  key: "yes",
+								  label: "Yes",
+								  color: "success",
+								  actionType: "add_test_account"
+							  },
+							  {
+								  key: "cancel",
+								  label: "Cancel",
+								  color: "default",
+								  actionType: "default"
+							  }
+						  ]);
+					  }}>Add Test Account</Button>
+					}
+				</div>
+
+				<TelegramAccountTable />
+				{telegramStore.state === "pending" && <Spinner />}
+			</div>
 		</>
 	);
 });
