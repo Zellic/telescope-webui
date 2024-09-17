@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { useTelegramStore } from "@/components/models/telegram";
-import BasicModal from "@/components/modal";
+import BasicModal from "@/components/tg-mobx/modals/modal";
 import React, { useState } from "react";
 import { Button, Spinner } from "@nextui-org/react";
 import { Input } from "@nextui-org/input";

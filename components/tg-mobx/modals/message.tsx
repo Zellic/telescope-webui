@@ -1,9 +1,8 @@
 import { observer } from "mobx-react-lite";
-import BasicModal from "@/components/modal";
+import BasicModal from "@/components/tg-mobx/modals/modal";
 import {
 	IModalButtonActionType,
 	TelegramInstance,
-	telegramStore,
 	useTelegramStore
 } from "@/components/models/telegram";
 import { Button } from "@nextui-org/react";
@@ -15,6 +14,7 @@ const MessageActions: Record<IModalButtonActionType, (telegramStore: TelegramIns
 		telegramStore.clearMessage()
 	},
 	'disconnect': (telegramStore: TelegramInstance) => {
+		// TODO: maybe make this update status
 		const client = telegramStore.messageClient;
 
 		// clear message after getting object or else we will be searching for nothing ... lol
@@ -30,6 +30,16 @@ const MessageActions: Record<IModalButtonActionType, (telegramStore: TelegramIns
 			});
 		}
 	},
+	'add_test_account': (telegramStore: TelegramInstance) => {
+		telegramStore.clearMessage();
+		ApiService.getInstance().addTestAccount().then((result) => {
+			if (result.success) {
+				telegramStore.setMessageBasic("Success", `Created test account.`);
+			} else {
+				telegramStore.setMessageBasic("Error", `Couldn't create test account: ${result.error}`);
+			}
+		});
+	}
 }
 
 export const MessageModal = observer(() => {
