@@ -71,8 +71,8 @@ export const ProvideModal = observer(() => {
 	const [submitting, setSubmitting] = useState(false);
 	const [value, setValue] = useState("");
 
-	const isOpen = telegramStore.authenticatingClient !== null;
-	const type = isOpen ? validators[telegramStore.authenticatingClient!.status.stage] : null;
+	const isOpen = telegramStore.modals.provide !== null;
+	const type = isOpen ? validators[telegramStore.modals.provide!.status.stage] : null;
 
 	let errorMsg: string | null = null;
 	if (type !== null && type?.validate !== null) {
@@ -80,7 +80,7 @@ export const ProvideModal = observer(() => {
 	}
 
 	const onClose = () => {
-		telegramStore.setAuthenticatingClient(null);
+		telegramStore.modals.setProvideClient(null);
 		setValue("");
 	};
 
@@ -88,7 +88,7 @@ export const ProvideModal = observer(() => {
 		<BasicModal
 			isOpen={isOpen}
 			onClose={onClose}
-			header={telegramStore.authenticatingClient?.status.stage}
+			header={telegramStore.modals.provide?.status.stage}
 			body={submitting ? <>Submitting...</> : <>
 				<p>
 					Please enter the thingy.
@@ -124,7 +124,7 @@ export const ProvideModal = observer(() => {
 					try {
 						setSubmitting(true);
 						const apiService = ApiService.getInstance();
-						const authClient = telegramStore.authenticatingClient;
+						const authClient = telegramStore.modals.provide;
 						const submit = await apiService.submitValue(authClient?.phone!, authClient?.status.stage!, value);
 						await new Promise(r => setTimeout(r, 2000));
 						setSubmitting(false);
@@ -146,7 +146,7 @@ export const ProvideModal = observer(() => {
 						// TODO: represent this error state
 					}
 
-					telegramStore.setAuthenticatingClient(null);
+					telegramStore.modals.setProvideClient(null);
 					setValue("");
 				}}>
 					Submit

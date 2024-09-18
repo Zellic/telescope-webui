@@ -20,12 +20,12 @@ export const AddAccountModal = observer(() => {
 	const [comment, setComment] = useState("");
 
 	const onClose = () => {
-		telegramStore.setAddAccountModal(false);
+		telegramStore.modals.setAddAccount(false);
 	};
 
 	return (
 		<BasicModal
-			isOpen={telegramStore.addAccountModal}
+			isOpen={telegramStore.modals.addAccount}
 			onClose={onClose}
 			header={"Add Telegram Account"}
 			body={submitting ? <>Submitting...</> :
@@ -77,13 +77,13 @@ export const AddAccountModal = observer(() => {
 
 					const result = await ApiService.getInstance().addAccount(phoneNumber, valueOrNull(email), valueOrNull(comment));
 					if (!result.success) {
-						telegramStore.setMessageBasic(
+						telegramStore.modals.setMessageBasic(
 							"Error",
 							`Failed to add account: ${result.error}`
 						);
 					}
 
-					telegramStore.setAddAccountModal(false);
+					telegramStore.modals.setAddAccount(false);
 					setSubmitting(false);
 				}}>
 					Submit
