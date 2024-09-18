@@ -2,20 +2,19 @@ import { observer } from "mobx-react-lite";
 import { useTelegramStore } from "@/components/models/telegram";
 import BasicModal from "@/components/tg-mobx/modals/modal";
 import React, { useState } from "react";
-import { Button, Spinner, Tooltip } from "@nextui-org/react";
+import { Button } from "@nextui-org/react";
 import { Input } from "@nextui-org/input";
 import { ApiService } from "@/components/api";
-import UserCard from "@/components/usercard";
 import { NameCell } from "@/components/tg-mobx/account-table";
 
 export const DeleteAccountModal = observer(() => {
 	const telegramStore = useTelegramStore();
 	const [value, setValue] = useState("");
 
-	const isOpen = telegramStore.deleteClient !== null;
+	const isOpen = telegramStore.modals.deleteClient !== null;
 
 	const onClose = () => {
-		telegramStore.setDeleteClient(null);
+		telegramStore.modals.setDeleteClient(null);
 		setValue("");
 	};
 
@@ -28,7 +27,7 @@ export const DeleteAccountModal = observer(() => {
 				<>
 					<p>Really remove this account from Telescope and delete all associated data?</p>
 					<div className="flex items-center ml-6">
-						<NameCell account={telegramStore.deleteClient!} />
+						<NameCell account={telegramStore.modals.deleteClient!} />
 					</div>
 				</>
 			}
@@ -58,14 +57,14 @@ export const DeleteAccountModal = observer(() => {
 								// TODO: this doesn't actually happen, it's async serverside. should probably change this?
 								// problem is client shutdown can take a bit...
 								if (!result.success) {
-									telegramStore.setMessageBasic(
+									telegramStore.modals.setMessageBasic(
 										"Error",
 										`Failed to delete account: ${result.error}`
 									);
 								}
-							})(telegramStore.deleteClient!.phone);
+							})(telegramStore.modals.deleteClient!.phone);
 
-							telegramStore.setDeleteClient(null);
+							telegramStore.modals.setDeleteClient(null);
 
 						}}>
 							Delete User

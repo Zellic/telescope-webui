@@ -46,9 +46,9 @@ export const StageButtons = observer(({ account }: { account: ITelegramAccount }
 			               onClick={() => {
 				               ApiService.getInstance().connectClient(account.phone).then((result) => {
 					               if (result.success) {
-						               telegramStore.setMessageBasic("Success", `Connected account ${account.phone}.`);
+						               telegramStore.modals.setMessageBasic("Success", `Connected account ${account.phone}.`);
 					               } else {
-						               telegramStore.setMessageBasic("Error", `Couldn't connect account ${account.phone}: ${result.error}`);
+						               telegramStore.modals.setMessageBasic("Error", `Couldn't connect account ${account.phone}: ${result.error}`);
 					               }
 				               });
 			               }} />
@@ -58,7 +58,7 @@ export const StageButtons = observer(({ account }: { account: ITelegramAccount }
 			<TooltipButton content={"Disconnect currently active Telegram session"}
 			               icon={VscDebugDisconnect} iconClass={"font-bold"}
 			               onClick={() => {
-				               telegramStore.setMessage("Disconnect", `Really disconnect ${account.phone}?`, [
+				               telegramStore.modals.setMessage("Disconnect", `Really disconnect ${account.phone}?`, [
 					               {
 						               key: "disconnect",
 						               label: "Disconnect",
@@ -86,7 +86,7 @@ export const ActionButtons = observer(({ account }: { account: ITelegramAccount 
 			               icon={TiMessageTyping}
 			               disabled={!account.lastCode}
 			               onClick={() => {
-				               telegramStore.setMessageBasic(
+				               telegramStore.modals.setMessageBasic(
 					               "Auth code",
 					               `As of ${getElapsedTime(account.lastCode!.date)} ago the login code is: ${account.lastCode!.value}`
 				               );
@@ -97,13 +97,13 @@ export const ActionButtons = observer(({ account }: { account: ITelegramAccount 
 			<TooltipButton content={"Edit account's 2FA password"}
 			               icon={MdModeEdit}
 			               onClick={() => {
-				               telegramStore.setPasswordEditingClient(account);
+				               telegramStore.modals.setEditPasswordClient(account);
 			               }} />
 
 			<TooltipButton content={"Remove account from Telescope"}
 			               icon={MdDeleteForever} color={"danger"}
 			               onClick={() => {
-				               telegramStore.setDeleteClient(account);
+				               telegramStore.modals.setDeleteClient(account);
 			               }} />
 
 		</IconContext.Provider>

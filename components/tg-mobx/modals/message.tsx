@@ -1,42 +1,42 @@
 import { observer } from "mobx-react-lite";
 import BasicModal from "@/components/tg-mobx/modals/modal";
 import {
-	IModalButtonActionType,
 	TelegramInstance,
 	useTelegramStore
 } from "@/components/models/telegram";
 import { Button } from "@nextui-org/react";
 import React from "react";
 import { ApiService } from "@/components/api";
+import { IModalButtonActionType } from "@/components/models/modal";
 
 const MessageActions: Record<IModalButtonActionType, (telegramStore: TelegramInstance) => void> = {
 	'default': (telegramStore: TelegramInstance) => {
-		telegramStore.clearMessage()
+		telegramStore.modals.clearMessage()
 	},
 	'disconnect': (telegramStore: TelegramInstance) => {
 		// TODO: maybe make this update status
-		const client = telegramStore.messageClient;
+		const client = telegramStore.modals.message?.client;
 
 		// clear message after getting object or else we will be searching for nothing ... lol
-		telegramStore.clearMessage();
+		telegramStore.modals.clearMessage();
 
 		if (client) {
 			ApiService.getInstance().disconnectClient(client.phone).then((result) => {
 				if (result.success) {
-					telegramStore.setMessageBasic("Success", `Disconnected account ${client.phone}.`);
+					telegramStore.modals.setMessageBasic("Success", `Disconnected account ${client.phone}.`);
 				} else {
-					telegramStore.setMessageBasic("Error", `Couldn't disconnect account ${client.phone}: ${result.error}`);
+					telegramStore.modals.setMessageBasic("Error", `Couldn't disconnect account ${client.phone}: ${result.error}`);
 				}
 			});
 		}
 	},
 	'add_test_account': (telegramStore: TelegramInstance) => {
-		telegramStore.clearMessage();
+		telegramStore.modals.clearMessage();
 		ApiService.getInstance().addTestAccount().then((result) => {
 			if (result.success) {
-				telegramStore.setMessageBasic("Success", `Created test account.`);
+				telegramStore.modals.setMessageBasic("Success", `Created test account.`);
 			} else {
-				telegramStore.setMessageBasic("Error", `Couldn't create test account: ${result.error}`);
+				telegramStore.modals.setMessageBasic("Error", `Couldn't create test account: ${result.error}`);
 			}
 		});
 	}
@@ -44,16 +44,17 @@ const MessageActions: Record<IModalButtonActionType, (telegramStore: TelegramIns
 
 export const MessageModal = observer(() => {
 	const telegramStore = useTelegramStore();
+	const modals = telegramStore.modals;
 
 	return (
 		<BasicModal
-			isOpen={telegramStore.message !== null}
+			isOpen={modals.message !== null}
 			onClose={() => {
-				telegramStore.clearMessage()
+				modals.clearMessage();
 			}}
-			header={telegramStore.message?.title}
-			body={<p>{telegramStore.message?.message}</p>}
-			footer={telegramStore.message?.buttons.map(it => {
+			header={modals.message?.title}
+			body={<p>{modals.message?.message}</p>}
+			footer={modals.message?.buttons.map(it => {
 				return (
 					<Button key={it.key} color={(it.color as any) || undefined} onPress={() => {
 						MessageActions[it.actionType](telegramStore);

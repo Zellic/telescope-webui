@@ -21,10 +21,10 @@ export const EditPasswordModal = observer(() => {
 		error = "Password and confirm field must match.";
 	}
 
-	const isOpen = telegramStore.passwordEditingClient !== null;
+	const isOpen = telegramStore.modals.editPassword !== null;
 
 	const onClose = () => {
-		telegramStore.setPasswordEditingClient(null);
+		telegramStore.modals.setEditPasswordClient(null);
 		setValue("");
 		setConfirm("");
 	};
@@ -38,7 +38,7 @@ export const EditPasswordModal = observer(() => {
 				<>
 					<p>You are submitting a new 2FA password for the following account:</p>
 					<div className="flex items-center ml-6">
-						<NameCell account={telegramStore.passwordEditingClient!} />
+						<NameCell account={telegramStore.modals.editPassword!} />
 					</div>
 				</>
 			}
@@ -83,14 +83,14 @@ export const EditPasswordModal = observer(() => {
 													        const result = await ApiService.getInstance().setpassword(phone, password);
 
 													        if (!result.success) {
-														        telegramStore.setMessageBasic(
+														        telegramStore.modals.setMessageBasic(
 															        "Error",
 															        `Failed to edit account password for ${phone}: ${result.error}`
 														        );
 													        }
-												        })(telegramStore.passwordEditingClient!.phone);
+												        })(telegramStore.modals.editPassword.phone);
 
-												        telegramStore.setPasswordEditingClient(null);
+												        telegramStore.modals.setEditPasswordClient(null);
 											        }}>
 												Change Password
 											</Button>

@@ -4,6 +4,7 @@ import { flow, Instance, onSnapshot, types } from "mobx-state-tree";
 import { createContext, useContext } from "react";
 import { ApiService } from "@/components/api";
 import { defaultEnvironment, Environment } from "@/components/models/environment";
+import { Modals } from "@/components/models/modal";
 
 export const AuthenticationStatus = types.model({
 	stage: types.enumeration("AuthState", [
@@ -44,71 +45,13 @@ export const TelegramAccount = types.model({
 
 export type ITelegramAccount = Instance<typeof TelegramAccount>;
 
-const ModalButtonActionType = types.enumeration("ActionType", ["default", "disconnect", "add_test_account"]);
-export type IModalButtonActionType = Instance<typeof ModalButtonActionType>;
-
-const MessageModalButton = types.model({
-	key: types.string,
-	label: types.string,
-	color: types.maybeNull(types.enumeration("Color", [
-		"default", "primary", "secondary", "success", "warning", "danger"
-	])),
-	actionType: ModalButtonActionType
-});
-
-export type IMessageModalButton = Instance<typeof MessageModalButton>;
-
-const MessageModal = types.model({
-	title: types.string,
-	message: types.string,
-	buttons: types.array(MessageModalButton)
-});
-
-export type IMessageModal = Instance<typeof MessageModal>;
-
 const TelegramModel = types
 	.model({
+		userApiHash: types.maybeNull(types.string),
 		clients: types.array(TelegramAccount),
 		state: types.enumeration("State", ["pending", "done", "error"]),
 		environment: Environment,
-		//
-		message: types.maybeNull(MessageModal),
-		messageClient: types.maybeNull(types.reference(TelegramAccount, {
-			get(identifier: string, parent: any /* RootStore */) {
-				return parent.clients.find((u: any) => u.phone === identifier);
-			},
-			set(value) {
-				return value.phone;
-			}
-		})),
-		//
-		userApiHash: types.maybeNull(types.string),
-		// these are for modals. this will be moved into its own store eventually ...
-		addAccountModal: types.boolean,
-		authenticatingClient: types.maybeNull(types.reference(TelegramAccount, {
-			get(identifier: string, parent: any /* RootStore */) {
-				return parent.clients.find((u: any) => u.phone === identifier);
-			},
-			set(value) {
-				return value.phone;
-			}
-		})),
-		passwordEditingClient: types.maybeNull(types.reference(TelegramAccount, {
-			get(identifier: string, parent: any /* RootStore */) {
-				return parent.clients.find((u: any) => u.phone === identifier);
-			},
-			set(value) {
-				return value.phone;
-			}
-		})),
-		deleteClient: types.maybeNull(types.reference(TelegramAccount, {
-			get(identifier: string, parent: any /* RootStore */) {
-				return parent.clients.find((u: any) => u.phone === identifier);
-			},
-			set(value) {
-				return value.phone;
-			}
-		}))
+		modals: Modals,
 	})
 	.actions(self => {
 		const fetchClients = flow(function* () {
@@ -150,60 +93,9 @@ const TelegramModel = types
 			}
 		});
 
-		function setAuthenticatingClient(client: ITelegramAccount | null) {
-			self.authenticatingClient = client;
-		}
-
-		function setPasswordEditingClient(client: ITelegramAccount | null) {
-			self.passwordEditingClient = client;
-		}
-
-		function setDeleteClient(client: ITelegramAccount | null) {
-			self.deleteClient = client;
-		}
-
-		function setAddAccountModal(state: boolean) {
-			self.addAccountModal = state;
-		}
-
-		function setMessage(title: string, message: string, buttons: Array<IMessageModalButton>, client?: ITelegramAccount) {
-			self.message = MessageModal.create({
-				title,
-				message,
-				buttons
-			});
-			self.messageClient = client || null;
-		}
-
-		function setMessageBasic(title: string, message: string, client?: ITelegramAccount) {
-			self.message = MessageModal.create({
-				title,
-				message,
-				buttons: [{
-					key: "okay",
-					label: "Okay",
-					color: "primary",
-					actionType: "default"
-				}]
-			});
-			self.messageClient = client || null;
-		}
-
-		function clearMessage() {
-			self.message = null;
-			self.messageClient = null;
-		}
-
 		return {
 			fetchClients,
 			fetchEnvironment,
-			setAuthenticatingClient,
-			setPasswordEditingClient,
-			setDeleteClient,
-			setAddAccountModal,
-			setMessage,
-			setMessageBasic,
-			clearMessage
 		};
 	});
 
@@ -215,7 +107,9 @@ export const telegramStore = TelegramModel.create({
 	clients: [],
 	state: "pending",
 	environment: defaultEnvironment,
-	addAccountModal: false,
+	modals: {
+		addAccount: false,
+	},
 });
 
 export type TelegramInstance = Instance<typeof TelegramModel>;
