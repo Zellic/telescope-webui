@@ -47,7 +47,7 @@ const AuthenticationCell = observer(({ account }: AccountCell) => {
 
 	return (
 		<Button isLoading={status === "warning"} onClick={() => {
-			telegramStore.setAuthenticatingClient(account);
+			telegramStore.modals.setProvideClient(account);
 		}}>
 			Provide
 		</Button>
