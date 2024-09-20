@@ -4,7 +4,7 @@ import { flow, Instance, onSnapshot, types } from "mobx-state-tree";
 import { createContext, useContext } from "react";
 import { ApiService } from "@/components/api";
 import { defaultEnvironment, Environment } from "@/components/models/environment";
-import { Modals } from "@/components/models/modal";
+import { ClientReference, Modals } from "@/components/models/modal";
 
 export const AuthenticationStatus = types.model({
 	stage: types.enumeration("AuthState", [
@@ -16,7 +16,8 @@ export const AuthenticationStatus = types.model({
 		"EmailCodeRequired",
 		"AuthorizationSuccess",
 		"ConnectionClosed",
-		"ErrorOccurred"
+		"ErrorOccurred",
+		"PhoneNumberRequired",
 	]),
 	inputRequired: types.boolean,
 	error: types.maybeNull(types.string)
@@ -93,9 +94,22 @@ const TelegramModel = types
 			}
 		});
 
+		const fetchClient = flow(function* (phone: string) {
+			try {
+				const apiService = ApiService.getInstance();
+				const client = yield apiService.getClient(phone);
+				if (client.success) {
+					self.clients.replace([client.data.client])
+				}
+			} catch (error) {
+				console.error(`Failed to fetch client: ${error}`)
+			}
+		});
+
 		return {
 			fetchClients,
 			fetchEnvironment,
+			fetchClient
 		};
 	});
 
@@ -107,9 +121,7 @@ export const telegramStore = TelegramModel.create({
 	clients: [],
 	state: "pending",
 	environment: defaultEnvironment,
-	modals: {
-		addAccount: false,
-	},
+	modals: {},
 });
 
 export type TelegramInstance = Instance<typeof TelegramModel>;

@@ -1,10 +1,11 @@
 import { observer } from "mobx-react-lite";
 import { useTelegramStore } from "@/components/models/telegram";
 import BasicModal from "@/components/tg-mobx/modals/modal";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "@nextui-org/input";
 import { Button, Spinner } from "@nextui-org/react";
 import { ApiService } from "@/components/api";
+import { GetCFEmail } from "@/app/onboarding/actions";
 
 function valueOrNull(s: string | undefined | null): string | null {
 	if (s && s.length > 0)
@@ -19,13 +20,19 @@ export const AddAccountModal = observer(() => {
 	const [email, setEmail] = useState("");
 	const [comment, setComment] = useState("");
 
+	useEffect(() => {
+		if (telegramStore.modals.addAccount === 'onboarding') {
+			GetCFEmail().then(res => setEmail(res || ""));
+		}
+	}, [telegramStore.modals.addAccount])
+
 	const onClose = () => {
-		telegramStore.modals.setAddAccount(false);
+		telegramStore.modals.setAddAccount(null);
 	};
 
 	return (
 		<BasicModal
-			isOpen={telegramStore.modals.addAccount}
+			isOpen={telegramStore.modals.addAccount !== null}
 			onClose={onClose}
 			header={"Add Telegram Account"}
 			body={submitting ? <>Submitting...</> :
@@ -46,6 +53,7 @@ export const AddAccountModal = observer(() => {
 					<Input
 						isRequired={false}
 						type="email"
+						isReadOnly={telegramStore.modals.addAccount === 'onboarding'}
 						label="E-mail"
 						placeholder="Enter email..."
 						labelPlacement="outside"
@@ -75,15 +83,30 @@ export const AddAccountModal = observer(() => {
 				<Button color="primary" onPress={async () => {
 					setSubmitting(true);
 
-					const result = await ApiService.getInstance().addAccount(phoneNumber, valueOrNull(email), valueOrNull(comment));
-					if (!result.success) {
-						telegramStore.modals.setMessageBasic(
-							"Error",
-							`Failed to add account: ${result.error}`
-						);
-					}
+					// if (telegramStore.environment.staging === true) {
+					// 	const result = await ApiService.getInstance().addTestAccount();
+					// 	if (!result.success) {
+					// 		telegramStore.modals.setMessageBasic(
+					// 			"Error",
+					// 			`Failed to add test account: ${result.error}`
+					// 		);
+					// 	} else {
+					// 		telegramStore.modals.setAddAccountPhone(result.data.phone);
+					// 	}
+					// } else {
+						const result = await ApiService.getInstance().addAccount(phoneNumber, valueOrNull(email), valueOrNull(comment));
+						if (!result.success) {
+							telegramStore.modals.setMessageBasic(
+								"Error",
+								`Failed to add account: ${result.error}`
+							);
+						}
+						else if (telegramStore.modals.addAccount === "onboarding") {
+							telegramStore.modals.setAddAccountPhone(phoneNumber);
+						}
+					// }
 
-					telegramStore.modals.setAddAccount(false);
+					telegramStore.modals.setAddAccount(null);
 					setSubmitting(false);
 				}}>
 					Submit
