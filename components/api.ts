@@ -79,6 +79,10 @@ export class ApiService {
 		return this.request<ClientList>("/clients");
 	}
 
+	public async getClient(phone: string): Promise<Result<{client: ITelegramAccount}>> {
+		return this.request<{client: ITelegramAccount}>("/getclient?phone=" + phone);
+	}
+
 	public async connectClient(phone: string): Promise<Result<MessageResult>> {
 		return this.request<MessageResult>("/tgconnect?phone=" + phone);
 	}
@@ -129,8 +133,8 @@ export class ApiService {
 		});
 	}
 
-	public async addTestAccount(): Promise<Result<{ message: string }>> {
-		return this.request<MessageResult>("/addtestaccount");
+	public async addTestAccount(): Promise<Result<{ message: string, phone: string }>> {
+		return this.request<MessageResult & {phone: string}>("/addtestaccount");
 	}
 
 	public async environment(): Promise<Result<IEnvironment>> {

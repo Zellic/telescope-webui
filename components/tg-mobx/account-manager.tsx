@@ -29,7 +29,7 @@ const TelegramAccountManager = observer(() => {
 
 				<div className="flex ml-auto gap-4 justify-between">
 					<Button size="sm" onClick={() => {
-						telegramStore.modals.setAddAccount(true);
+						telegramStore.modals.setAddAccount("normal");
 					}}>Add Account</Button>
 
 					{telegramStore.environment.staging &&

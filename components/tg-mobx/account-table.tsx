@@ -54,10 +54,10 @@ const AuthenticationCell = observer(({ account }: AccountCell) => {
 	);
 });
 
-const ActionsCell = observer(({ account }: AccountCell) => {
+const ActionsCell = observer(({ account, onboarding }: AccountCell & {onboarding?: boolean}) => {
 	return (
 		<div className="relative flex items-center gap-2">
-			<ActionButtons account={account} />
+			<ActionButtons account={account} onboarding={onboarding} />
 		</div>
 	);
 });
@@ -70,7 +70,7 @@ const columns = [
 	{ name: "ACTIONS", uid: "actions" }
 ];
 
-const TelegramAccountTable = observer(() => {
+const TelegramAccountTable = observer(({onboarding}: {onboarding?: boolean}) => {
 	const telegramStore = useTelegramStore();
 
 	return (
@@ -88,7 +88,7 @@ const TelegramAccountTable = observer(() => {
 						<TableCell><NameCell account={account} /></TableCell>
 						<TableCell><StatusCell account={account} /></TableCell>
 						<TableCell><AuthenticationCell account={account} /></TableCell>
-						<TableCell><ActionsCell account={account} /></TableCell>
+						<TableCell><ActionsCell onboarding={onboarding} account={account} /></TableCell>
 					</TableRow>
 				))}
 			</TableBody>
