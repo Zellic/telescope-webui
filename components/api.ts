@@ -1,5 +1,5 @@
-import { TelegramAccount } from "@/components/tg/account-table-types";
-import { Environment } from "@/components/providers/environment";
+import { ITelegramAccount } from "@/components/models/telegram";
+import { IEnvironment } from "@/components/models/environment";
 
 export type Result<T, E = string> = {
 	success: true;
@@ -11,29 +11,30 @@ export type Result<T, E = string> = {
 
 export interface ClientList {
 	hash: string,
-	items: Array<TelegramAccount> | undefined
+	items: Array<ITelegramAccount> | undefined
 }
 
 export interface MessageResult {
-	message: string
+	message: string;
 }
 
 export class ApiService {
 	private static instance: ApiService;
 	private readonly baseURL: string;
+
 	private constructor() {
 		const currentProtocol = window.location.protocol;  // 'http:' or 'https:'
 		const currentHostname = window.location.hostname;
-		const protocol = currentProtocol === 'https:' ? 'https' : 'http';
+		const protocol = currentProtocol === "https:" ? "https" : "http";
 
 		// when we're running the python server and the frontend separately we'll be on localhost
 		// thus the python backend is probably running on :8888
-		if (currentHostname === 'localhost') {
+		if (currentHostname === "localhost") {
 			this.baseURL = `${protocol}://localhost:8888`;
 		} else {
 			const port = window.location.port;
 
-			if(port == '') {
+			if (port == "") {
 				this.baseURL = `${protocol}://${currentHostname}`;
 			} else {
 				this.baseURL = `${protocol}://${currentHostname}:${port}`;
@@ -56,7 +57,7 @@ export class ApiService {
 			if (!response.ok) {
 				return {
 					success: false,
-					error: data.error || 'Unknown error occurred'
+					error: data.error || "Unknown error occurred"
 				};
 			}
 
@@ -67,45 +68,50 @@ export class ApiService {
 		} catch (error) {
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error occurred'
+				error: error instanceof Error ? error.message : "Unknown error occurred"
 			};
 		}
 	}
 
 	public async getClients(hash: string | null | undefined): Promise<Result<ClientList>> {
-		if(hash)
-			return this.request<ClientList>('/clients?hash=' + hash);
-		return this.request<ClientList>('/clients');
+		if (hash)
+			return this.request<ClientList>("/clients?hash=" + hash);
+		return this.request<ClientList>("/clients");
+	}
+
+	public async getClient(phone: string): Promise<Result<{client: ITelegramAccount}>> {
+		return this.request<{client: ITelegramAccount}>("/getclient?phone=" + phone);
 	}
 
 	public async connectClient(phone: string): Promise<Result<MessageResult>> {
-		return this.request<MessageResult>('/tgconnect?phone=' + phone);
+		return this.request<MessageResult>("/tgconnect?phone=" + phone);
 	}
 
 	public async disconnectClient(phone: string): Promise<Result<MessageResult>> {
-		return this.request<MessageResult>('/tgdisconnect?phone=' + phone);
+		return this.request<MessageResult>("/tgdisconnect?phone=" + phone);
 	}
 
 	public async deleteaccount(phone: string): Promise<Result<MessageResult>> {
-		return this.request<MessageResult>('/deleteaccount?phone=' + phone);
+		return this.request<MessageResult>("/deleteaccount?phone=" + phone);
 	}
 
 	public async setpassword(phone: string, password: string): Promise<Result<MessageResult>> {
-		return this.request<{ message: string }>('/setpassword?phone=' + phone, {
-			method: 'POST',
+		return this.request<{ message: string }>("/setpassword?phone=" + phone, {
+			method: "POST",
 			headers: {
-				'Content-Type': 'application/json',
+				"Content-Type": "application/json"
 			},
-			body: JSON.stringify({ password }),
+			body: JSON.stringify({ password })
 		});
 	}
+
 	public async submitValue(phone: string, stage: string, value: string): Promise<Result<{ message: string }>> {
-		return this.request<{ message: string }>('/submitvalue', {
-			method: 'POST',
+		return this.request<{ message: string }>("/submitvalue", {
+			method: "POST",
 			headers: {
-				'Content-Type': 'application/json',
+				"Content-Type": "application/json"
 			},
-			body: JSON.stringify({ phone, stage, value }),
+			body: JSON.stringify({ phone, stage, value })
 		});
 	}
 
@@ -114,24 +120,24 @@ export class ApiService {
 		email: string | null,
 		comment: string | null
 	): Promise<Result<{ message: string }>> {
-		return this.request<{ message: string }>('/addtgaccount', {
-			method: 'POST',
+		return this.request<{ message: string }>("/addtgaccount", {
+			method: "POST",
 			headers: {
-				'Content-Type': 'application/json',
+				"Content-Type": "application/json"
 			},
 			body: JSON.stringify({
 				phone_number: phoneNumber,
 				email,
 				comment
-			}),
+			})
 		});
 	}
 
-	public async addTestAccount(): Promise<Result<{ message: string }>> {
-		return this.request<MessageResult>('/addtestaccount');
+	public async addTestAccount(): Promise<Result<{ message: string, phone: string }>> {
+		return this.request<MessageResult & {phone: string}>("/addtestaccount");
 	}
 
-	public async environment(): Promise<Result<Environment>> {
-		return this.request<Environment>('/environment', {})
+	public async environment(): Promise<Result<IEnvironment>> {
+		return this.request<IEnvironment>("/environment", {});
 	}
 }
