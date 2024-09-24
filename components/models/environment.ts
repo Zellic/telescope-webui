@@ -1,11 +1,11 @@
 import { Instance, types } from "mobx-state-tree";
 
 export const Environment = types.model({
-	staging: types.boolean,
+	environment: types.enumeration("EnvironmentState", ['Production', 'Staging']),
 })
 
 export type IEnvironment = Instance<typeof Environment>;
 
 export const defaultEnvironment: IEnvironment = {
-	staging: false,
+	environment: 'Production',
 }

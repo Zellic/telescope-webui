@@ -1,5 +1,6 @@
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@nextui-org/react";
 import React from "react";
+import { observer } from "mobx-react-lite";
 
 interface BasicModalProps {
 	isOpen: boolean;
@@ -10,11 +11,9 @@ interface BasicModalProps {
 	footer: React.ReactNode;
 }
 
-export default function BasicModal(props: BasicModalProps) {
-	const { isOpen, onOpenChange } = useDisclosure({ isOpen: props.isOpen });
-
+const BasicModal = observer((props: BasicModalProps) => {
 	return (
-		<Modal isOpen={isOpen} onOpenChange={onOpenChange} onClose={props.onClose}>
+		<Modal isOpen={props.isOpen} onClose={props.onClose}>
 			<ModalContent>
 				<ModalHeader className="flex flex-col gap-1">
 					{props.header}
@@ -28,4 +27,6 @@ export default function BasicModal(props: BasicModalProps) {
 			</ModalContent>
 		</Modal>
 	);
-}
+})
+
+export default BasicModal;
