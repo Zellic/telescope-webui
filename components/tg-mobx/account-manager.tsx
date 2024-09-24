@@ -8,6 +8,7 @@ import { Spinner } from "@nextui-org/react";
 import { Modals } from "@/components/tg-mobx/modals/modals";
 import { Button } from "@nextui-org/button";
 import React from "react";
+import { Card, CardBody } from "@nextui-org/card";
 
 
 const TelegramAccountManager = observer(() => {
@@ -16,11 +17,21 @@ const TelegramAccountManager = observer(() => {
 	useAsyncIntervalForeground(
 		5000,
 		async () => {
-			await telegramStore.fetchClients();
-			await telegramStore.fetchEnvironment();
+			if (telegramStore.state !== 'error') {
+				await telegramStore.fetchClients();
+				await telegramStore.fetchEnvironment();
+			}
 		},
 		[telegramStore]
 	);
+
+	if (telegramStore.state === 'error') {
+		return (
+			<Card>
+				<CardBody>Failed to reach server. Please try again later.</CardBody>
+			</Card>
+		)
+	}
 
 	return (
 		<>
@@ -32,7 +43,7 @@ const TelegramAccountManager = observer(() => {
 						telegramStore.modals.setAddAccount("normal");
 					}}>Add Account</Button>
 
-					{telegramStore.environment.staging &&
+					{telegramStore.environment.environment === 'Staging' &&
                       <Button size="sm" onClick={() => {
 						  telegramStore.modals.setMessage("Add Test Account", "Really add test acccount?", [
 							  {

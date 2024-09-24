@@ -10,6 +10,7 @@ import { MessageModal } from "@/components/tg-mobx/modals/message";
 import TelegramAccountTable from "@/components/tg-mobx/account-table";
 import { ProvideModal } from "@/components/tg-mobx/modals/provide";
 import { redirect, useSearchParams } from "next/navigation";
+import { Card, CardBody } from "@nextui-org/card";
 
 const Onboarding = observer(() => {
 	const telegramStore = useTelegramStore();
@@ -30,6 +31,14 @@ const Onboarding = observer(() => {
 		if (url) {
 			redirect(url);
 		}
+	}
+
+	if (telegramStore.state === 'error') {
+		return (
+			<Card>
+				<CardBody>Failed to reach server. Please try again later.</CardBody>
+			</Card>
+		)
 	}
 
 	return (
