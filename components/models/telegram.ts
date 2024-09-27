@@ -94,22 +94,22 @@ const TelegramModel = types
 			}
 		});
 
-		const fetchClient = flow(function* (phone: string) {
-			try {
-				const apiService = ApiService.getInstance();
-				const client = yield apiService.getClient(phone);
-				if (client.success) {
-					self.clients.replace([client.data.client])
-				}
-			} catch (error) {
-				console.error(`Failed to fetch client: ${error}`)
-			}
-		});
+		// const fetchClient = flow(function* (phone: string) {
+		// 	try {
+		// 		const apiService = ApiService.getInstance();
+		// 		const client = yield apiService.getClient(phone);
+		// 		if (client.success) {
+		// 			self.clients.replace([client.data.client])
+		// 		}
+		// 	} catch (error) {
+		// 		console.error(`Failed to fetch client: ${error}`)
+		// 	}
+		// });
 
 		return {
 			fetchClients,
 			fetchEnvironment,
-			fetchClient
+			// fetchClient
 		};
 	});
 
