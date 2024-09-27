@@ -19,9 +19,8 @@ const Onboarding = observer(() => {
 	useAsyncIntervalForeground(
 		2500, // update a bit faster for one person
 		async () => {
-			if (telegramStore.modals.addAccountPhone) {
-				await telegramStore.fetchClient(telegramStore.modals.addAccountPhone);
-			}
+			// this should only display the client we have view permissions upon (CF SSO)
+			await telegramStore.fetchClients();
 		},
 		[telegramStore]
 	);
