@@ -42,7 +42,7 @@ const AuthenticationCell = observer(({ account }: AccountCell) => {
 		return <p>{account.status.error}</p>;
 	}
 
-	if (status === "success" || !account.status.inputRequired)
+	if (status === "success" || !account.status.inputRequired || account.privileges.indexOf("manage_connection_state") < 0)
 		return null;
 
 	return (

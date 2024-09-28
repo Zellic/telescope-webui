@@ -6,8 +6,8 @@ import { TiMessageTyping } from "react-icons/ti";
 import { ApiService } from "@/components/api";
 import { MdDeleteForever, MdModeEdit, MdOutlineLogin } from "react-icons/md";
 import { VscDebugDisconnect } from "react-icons/vsc";
-import React from "react";
-import { ITelegramAccount, useTelegramStore } from "@/components/models/telegram";
+import React, { Fragment } from "react";
+import { ITelegramAccount, PrivilegeUnion, useTelegramStore } from "@/components/models/telegram";
 import { observer } from "mobx-react-lite";
 
 interface TooltipButtonProps {
@@ -36,7 +36,7 @@ function TooltipButton(props: TooltipButtonProps) {
 	);
 }
 
-export const StageButtons = observer(({ account, onboarding }: { account: ITelegramAccount, onboarding?: boolean }) => {
+export const ConnectionButtons = observer(({ account, onboarding }: { account: ITelegramAccount, onboarding?: boolean }) => {
 	const telegramStore = useTelegramStore();
 
 	if (account.status.stage === "ClientNotStarted") {
@@ -82,33 +82,43 @@ export const StageButtons = observer(({ account, onboarding }: { account: ITeleg
 export const ActionButtons = observer(({ account, onboarding }: { account: ITelegramAccount, onboarding?: boolean }) => {
 	const telegramStore = useTelegramStore();
 
+	const has = (priv: PrivilegeUnion) => account.privileges.indexOf(priv) >= 0
+
 	return (
 		<IconContext.Provider value={{ size: "19px" }}>
-			<TooltipButton content={"Retrieve auth code"}
-			               icon={TiMessageTyping}
-			               disabled={!account.lastCode || onboarding}
-			               onClick={() => {
-				               telegramStore.modals.setMessageBasic(
-					               "Auth code",
-					               `As of ${getElapsedTime(account.lastCode!.date)} ago the login code is: ${account.lastCode!.value}`
-				               );
-			               }} />
+			{!has("login") ? null :
+				<TooltipButton content={"Retrieve auth code"}
+		               icon={TiMessageTyping}
+		               disabled={!account.lastCode || onboarding}
+		               onClick={() => {
+			               telegramStore.modals.setMessageBasic(
+				               "Auth code",
+				               `As of ${getElapsedTime(account.lastCode!.date)} ago the login code is: ${account.lastCode!.value}`
+			               );
+		               }} />
+			}
 
-			<StageButtons onboarding={onboarding} account={account} />
+			{!has("manage_connection_state") ? null :
+				<ConnectionButtons onboarding={onboarding} account={account} />
+			}
 
-			<TooltipButton content={"Edit account's 2FA password"}
-			               icon={MdModeEdit}
-			               disabled={onboarding}
-			               onClick={() => {
-				               telegramStore.modals.setEditPasswordClient(account);
-			               }} />
+			{!has("edit_two_factor_password") ? null :
+				<TooltipButton content={"Edit account's 2FA password"}
+				               icon={MdModeEdit}
+				               disabled={onboarding}
+				               onClick={() => {
+					               telegramStore.modals.setEditPasswordClient(account);
+				               }} />
+			}
 
-			<TooltipButton content={"Remove account from Telescope"}
-			               icon={MdDeleteForever} color={"danger"}
-			               disabled={onboarding}
-			               onClick={() => {
-				               telegramStore.modals.setDeleteClient(account);
-			               }} />
+			{!has("remove_account") ? null :
+				<TooltipButton content={"Remove account from Telescope"}
+				               icon={MdDeleteForever} color={"danger"}
+				               disabled={onboarding}
+				               onClick={() => {
+					               telegramStore.modals.setDeleteClient(account);
+				               }} />
+			}
 
 		</IconContext.Provider>
 	);
