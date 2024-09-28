@@ -3,7 +3,6 @@
 import { flow, Instance, onSnapshot, types } from "mobx-state-tree";
 import { createContext, useContext } from "react";
 import { ApiService } from "@/components/api";
-import { defaultEnvironment, Environment } from "@/components/models/environment";
 import { ClientReference, Modals } from "@/components/models/modal";
 
 export const AuthenticationStatus = types.model({
@@ -51,7 +50,7 @@ const TelegramModel = types
 		userApiHash: types.maybeNull(types.string),
 		clients: types.array(TelegramAccount),
 		state: types.enumeration("State", ["pending", "done", "error"]),
-		environment: Environment,
+		environment: types.enumeration("Environment", ["Staging", "Production"]),
 		modals: Modals,
 	})
 	.actions(self => {
@@ -68,6 +67,7 @@ const TelegramModel = types
 				if (clients.success) {
 					if (clients.data.hash !== self.userApiHash) {
 						self.clients = clients.data.items || [];
+						self.environment = clients.data.environment
 					}
 
 					self.userApiHash = clients.data.hash;
@@ -82,34 +82,21 @@ const TelegramModel = types
 			}
 		});
 
-		const fetchEnvironment = flow(function* () {
+		const fetchClient = flow(function* (phone: string) {
 			try {
 				const apiService = ApiService.getInstance();
-				const environment = yield apiService.environment();
-				if (environment.success) {
-					self.environment = environment.data;
+				const client = yield apiService.getClient(phone);
+				if (client.success) {
+					self.clients.replace([client.data.client])
 				}
 			} catch (error) {
-				console.error(`Failed to fetch environment: ${error}`);
+				console.error(`Failed to fetch client: ${error}`)
 			}
 		});
 
-		// const fetchClient = flow(function* (phone: string) {
-		// 	try {
-		// 		const apiService = ApiService.getInstance();
-		// 		const client = yield apiService.getClient(phone);
-		// 		if (client.success) {
-		// 			self.clients.replace([client.data.client])
-		// 		}
-		// 	} catch (error) {
-		// 		console.error(`Failed to fetch client: ${error}`)
-		// 	}
-		// });
-
 		return {
 			fetchClients,
-			fetchEnvironment,
-			// fetchClient
+			fetchClient
 		};
 	});
 
@@ -120,7 +107,7 @@ const TelegramModel = types
 export const telegramStore = TelegramModel.create({
 	clients: [],
 	state: "pending",
-	environment: defaultEnvironment,
+	environment: "Production",
 	modals: {},
 });
 

@@ -19,7 +19,6 @@ const TelegramAccountManager = observer(() => {
 		async () => {
 			if (telegramStore.state !== 'error') {
 				await telegramStore.fetchClients();
-				await telegramStore.fetchEnvironment();
 			}
 		},
 		[telegramStore]
@@ -43,7 +42,7 @@ const TelegramAccountManager = observer(() => {
 						telegramStore.modals.setAddAccount("normal");
 					}}>Add Account</Button>
 
-					{telegramStore.environment.environment === 'Staging' &&
+					{telegramStore.environment == "Staging" &&
                       <Button size="sm" onClick={() => {
 						  telegramStore.modals.setMessage("Add Test Account", "Really add test acccount?", [
 							  {
