@@ -1,6 +1,6 @@
 "use client";
 
-import { flow, Instance, onSnapshot, types } from "mobx-state-tree";
+import { flow, Instance, ISimpleType, onSnapshot, types } from "mobx-state-tree";
 import { createContext, useContext } from "react";
 import { ApiService } from "@/components/api";
 import { ClientReference, Modals } from "@/components/models/modal";
@@ -24,6 +24,8 @@ export const AuthenticationStatus = types.model({
 
 export type IAuthenticationStatus = Instance<typeof AuthenticationStatus>;
 export type IAuthStage = IAuthenticationStatus["stage"];
+export const Privilege = types.enumeration("Privileges", ["view", "edit_two_factor_password", "login", "manage_connection_state", "remove_account"])
+export type PrivilegeUnion = typeof Privilege extends ISimpleType<infer U> ? U : never;
 
 export const TelegramAccount = types.model({
 	name: types.maybeNull(types.string),
@@ -35,7 +37,8 @@ export const TelegramAccount = types.model({
 		value: types.number,
 		date: types.number
 	})),
-	status: AuthenticationStatus
+	status: AuthenticationStatus,
+	privileges: types.array(Privilege),
 })
 	.actions((self) => ({
 		updateStatus(status: IAuthenticationStatus) {
