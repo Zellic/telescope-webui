@@ -22,7 +22,7 @@ export const AddAccountModal = observer(() => {
 
 	useEffect(() => {
 		if (telegramStore.modals.addAccount === 'onboarding') {
-			GetCFEmail().then(res => setEmail(res || ""));
+			setEmail(GetCFEmail() || "")
 		}
 	}, [telegramStore.modals.addAccount])
 

@@ -1,10 +1,7 @@
-'use server';
-
-import { cookies } from "next/headers";
-
-export async function GetCFEmail(): Promise<string | null> {
-	const cookieStore = cookies()
-	const CF_Authorization = cookieStore.get('CF_Authorization')?.value
+export function GetCFEmail(): string | null {
+	const cookieString = document.cookie;
+	const cookies = cookieString.split('; ');
+	const CF_Authorization = cookies.find(cookie => cookie.startsWith('CF_Authorization='))?.split('=')[1];
 
 	if (CF_Authorization) {
 		const split = CF_Authorization.split('.');
