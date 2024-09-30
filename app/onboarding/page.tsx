@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { AddAccountModal } from "@/components/tg-mobx/modals/add-account";
 import { Button } from "@nextui-org/button";
@@ -68,4 +68,12 @@ const Onboarding = observer(() => {
 	);
 });
 
-export default Onboarding;
+const OnboardingSuspense = observer(() => {
+	return (
+		<Suspense>
+			<Onboarding/>
+		</Suspense>
+	)
+})
+
+export default OnboardingSuspense;
