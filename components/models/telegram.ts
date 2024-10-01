@@ -5,6 +5,7 @@ import { createContext, useContext } from "react";
 import { ApiService } from "@/components/api";
 import { ClientReference, Modals } from "@/components/models/modal";
 import { GetCFEmail } from "@/app/onboarding/actions";
+import { SocketMessage } from "@/components/models/socket";
 
 export const AuthenticationStatus = types.model({
 	stage: types.enumeration("AuthState", [
@@ -17,7 +18,7 @@ export const AuthenticationStatus = types.model({
 		"AuthorizationSuccess",
 		"ConnectionClosed",
 		"ErrorOccurred",
-		"PhoneNumberRequired",
+		"PhoneNumberRequired"
 	]),
 	inputRequired: types.boolean,
 	error: types.maybeNull(types.string)
@@ -25,7 +26,7 @@ export const AuthenticationStatus = types.model({
 
 export type IAuthenticationStatus = Instance<typeof AuthenticationStatus>;
 export type IAuthStage = IAuthenticationStatus["stage"];
-export const Privilege = types.enumeration("Privileges", ["view", "edit_two_factor_password", "login", "manage_connection_state", "remove_account"])
+export const Privilege = types.enumeration("Privileges", ["view", "edit_two_factor_password", "login", "manage_connection_state", "remove_account"]);
 export type PrivilegeUnion = typeof Privilege extends ISimpleType<infer U> ? U : never;
 
 export const TelegramAccount = types.model({
@@ -39,7 +40,7 @@ export const TelegramAccount = types.model({
 		date: types.number
 	})),
 	status: AuthenticationStatus,
-	privileges: types.array(Privilege),
+	privileges: types.array(Privilege)
 })
 	.actions((self) => ({
 		updateStatus(status: IAuthenticationStatus) {
@@ -56,7 +57,7 @@ const TelegramModel = types
 		cfClient: ClientReference,
 		state: types.enumeration("State", ["pending", "done", "error"]),
 		environment: types.enumeration("Environment", ["Staging", "Production"]),
-		modals: Modals,
+		modals: Modals
 	})
 	.actions(self => {
 		const fetchClients = flow(function* () {
@@ -72,7 +73,7 @@ const TelegramModel = types
 				if (clients.success) {
 					if (clients.data.hash !== self.userApiHash) {
 						self.clients = clients.data.items || [];
-						self.environment = clients.data.environment
+						self.environment = clients.data.environment;
 					}
 
 					self.userApiHash = clients.data.hash;
@@ -92,23 +93,35 @@ const TelegramModel = types
 				const apiService = ApiService.getInstance();
 				const client = yield apiService.getClient(phone);
 				if (client.success) {
-					self.clients.replace([client.data.client])
+					self.clients.replace([client.data.client]);
 				}
 			} catch (error) {
-				console.error(`Failed to fetch client: ${error}`)
+				console.error(`Failed to fetch client: ${error}`);
 			}
 		});
 
 		function updateCfClient() {
 			if (self.cfClient === null) {
-				self.cfClient = self.clients.find(u => u.email === GetCFEmail())
+				self.cfClient = self.clients.find(u => u.email === GetCFEmail());
+			}
+		}
+
+		function updateFromSocket(message: SocketMessage) {
+			switch (message.type) {
+				case "CLIENT_START": {
+					// @ts-ignore
+					console.log(message.data)
+					self.clients = message.data.items;
+					break;
+				}
 			}
 		}
 
 		return {
 			fetchClients,
 			fetchClient,
-			updateCfClient
+			updateCfClient,
+			updateFromSocket
 		};
 	});
 
@@ -120,7 +133,7 @@ export const telegramStore = TelegramModel.create({
 	clients: [],
 	state: "pending",
 	environment: "Production",
-	modals: {},
+	modals: {}
 });
 
 export type TelegramInstance = Instance<typeof TelegramModel>;

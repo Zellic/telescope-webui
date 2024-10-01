@@ -7,22 +7,46 @@ import TelegramAccountTable from "@/components/tg-mobx/account-table";
 import { Spinner } from "@nextui-org/react";
 import { Modals } from "@/components/tg-mobx/modals/modals";
 import { Button } from "@nextui-org/button";
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardBody } from "@nextui-org/card";
 
 
 const TelegramAccountManager = observer(() => {
 	const telegramStore = useTelegramStore();
 
-	useAsyncIntervalForeground(
-		5000,
-		async () => {
-			if (telegramStore.state !== 'error') {
-				await telegramStore.fetchClients();
+	// useAsyncIntervalForeground(
+	// 	5000,
+	// 	async () => {
+	// 		if (telegramStore.state !== 'error') {
+	// 			await telegramStore.fetchClients();
+	// 		}
+	// 	},
+	// 	[telegramStore]
+	// );
+
+	useEffect(() => {
+		const socket = new WebSocket('ws://localhost:8888/socket');
+
+		socket.onopen = () => {};
+		socket.onclose = () => {};
+
+		socket.onmessage = (event) => {
+			try {
+				const message = JSON.parse(event.data);
+				if (message.hasOwnProperty('type')) {
+					telegramStore.updateFromSocket(message);
+				} else {
+					console.error("WebSocket data must contain an `id` field")
+				}
+			} catch (e) {
+				console.error(`WebSocket received invalid JSON: ${e}`)
 			}
-		},
-		[telegramStore]
-	);
+		};
+
+		return () => {
+			socket.close();
+		};
+	}, [])
 
 	if (telegramStore.state === 'error') {
 		return (
