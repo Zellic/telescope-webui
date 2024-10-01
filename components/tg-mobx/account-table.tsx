@@ -24,7 +24,7 @@ export const NameCell = observer(({ account }: AccountCell) => {
 	);
 });
 
-const StatusCell = observer(({ account }: AccountCell) => {
+export const StatusCell = observer(({ account }: AccountCell) => {
 	const status = stageToStatus(account);
 
 	return (
@@ -34,7 +34,7 @@ const StatusCell = observer(({ account }: AccountCell) => {
 	);
 });
 
-const AuthenticationCell = observer(({ account }: AccountCell) => {
+export const AuthenticationCell = observer(({ account }: AccountCell) => {
 	const telegramStore = useTelegramStore();
 	const status = stageToStatus(account);
 
