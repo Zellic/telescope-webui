@@ -4,6 +4,7 @@ import { flow, Instance, ISimpleType, onSnapshot, types } from "mobx-state-tree"
 import { createContext, useContext } from "react";
 import { ApiService } from "@/components/api";
 import { ClientReference, Modals } from "@/components/models/modal";
+import { GetCFEmail } from "@/app/onboarding/actions";
 
 export const AuthenticationStatus = types.model({
 	stage: types.enumeration("AuthState", [
@@ -52,6 +53,7 @@ const TelegramModel = types
 	.model({
 		userApiHash: types.maybeNull(types.string),
 		clients: types.array(TelegramAccount),
+		cfClient: ClientReference,
 		state: types.enumeration("State", ["pending", "done", "error"]),
 		environment: types.enumeration("Environment", ["Staging", "Production"]),
 		modals: Modals,
@@ -97,9 +99,16 @@ const TelegramModel = types
 			}
 		});
 
+		function updateCfClient() {
+			if (self.cfClient === null) {
+				self.cfClient = self.clients.find(u => u.email === GetCFEmail())
+			}
+		}
+
 		return {
 			fetchClients,
-			fetchClient
+			fetchClient,
+			updateCfClient
 		};
 	});
 
