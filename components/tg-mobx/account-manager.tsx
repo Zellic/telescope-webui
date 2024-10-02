@@ -14,41 +14,16 @@ import { Card, CardBody } from "@nextui-org/card";
 const TelegramAccountManager = observer(() => {
 	const telegramStore = useTelegramStore();
 
-	// useAsyncIntervalForeground(
-	// 	5000,
-	// 	async () => {
-	// 		if (telegramStore.state !== 'error') {
-	// 			await telegramStore.fetchClients();
-	// 		}
-	// 	},
-	// 	[telegramStore]
-	// );
-
 	useEffect(() => {
-		const socket = new WebSocket('ws://localhost:8888/socket');
-
-		socket.onopen = () => {};
-		socket.onclose = () => {};
-
-		socket.onmessage = (event) => {
-			try {
-				const message = JSON.parse(event.data);
-				if (message.hasOwnProperty('type')) {
-					telegramStore.updateFromSocket(message);
-				} else {
-					console.error("WebSocket data must contain an `id` field")
-				}
-			} catch (e) {
-				console.error(`WebSocket received invalid JSON: ${e}`)
-			}
-		};
+		const url = 'ws://localhost:8888/socket';
+		telegramStore.socket.connect(url);
 
 		return () => {
-			socket.close();
+			telegramStore.socket.disconnect();
 		};
 	}, [])
 
-	if (telegramStore.state === 'error') {
+	if (telegramStore.socket.socketState === 'error') {
 		return (
 			<Card>
 				<CardBody>Failed to reach server. Please try again later.</CardBody>
@@ -87,7 +62,7 @@ const TelegramAccountManager = observer(() => {
 				</div>
 
 				<TelegramAccountTable />
-				{telegramStore.state === "pending" && <Spinner />}
+				{telegramStore.clientsState === "pending" && <Spinner />}
 			</div>
 		</>
 	);
