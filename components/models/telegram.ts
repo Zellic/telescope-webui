@@ -50,55 +50,58 @@ export const TelegramAccount = types.model({
 
 export type ITelegramAccount = Instance<typeof TelegramAccount>;
 
+export const Environment = types.enumeration("Environment", ["Staging", "Production"]);
+export type IEnvironment = Instance<typeof Environment>
+
 const TelegramModel = types
 	.model({
-		userApiHash: types.maybeNull(types.string),
+		// userApiHash: types.maybeNull(types.string),
 		clients: types.array(TelegramAccount),
 		cfClient: ClientReference,
 		state: types.enumeration("State", ["pending", "done", "error"]),
-		environment: types.enumeration("Environment", ["Staging", "Production"]),
+		environment: Environment,
 		modals: Modals
 	})
 	.actions(self => {
-		const fetchClients = flow(function* () {
-			// note: we don't reset the state to 'pending' as our default state is pending
-			//       and we don't want to show a spinner on every client fetch (this should happen
-			//       in the background)
-			// self.state = 'pending'
+		// const fetchClients = flow(function* () {
+		// 	// note: we don't reset the state to 'pending' as our default state is pending
+		// 	//       and we don't want to show a spinner on every client fetch (this should happen
+		// 	//       in the background)
+		// 	// self.state = 'pending'
+		//
+		// 	try {
+		// 		const apiService = ApiService.getInstance();
+		// 		const clients = yield apiService.getClients(self.userApiHash);
+		//
+		// 		if (clients.success) {
+		// 			if (clients.data.hash !== self.userApiHash) {
+		// 				self.clients = clients.data.items || [];
+		// 				self.environment = clients.data.environment;
+		// 			}
+		//
+		// 			self.userApiHash = clients.data.hash;
+		// 			self.state = "done";
+		// 		} else {
+		// 			console.error(`Error fetching from server: ${clients.error}`);
+		// 			self.state = "error";
+		// 		}
+		// 	} catch (error) {
+		// 		console.error(`Failed to fetch clients: ${error}`);
+		// 		self.state = "error";
+		// 	}
+		// });
 
-			try {
-				const apiService = ApiService.getInstance();
-				const clients = yield apiService.getClients(self.userApiHash);
-
-				if (clients.success) {
-					if (clients.data.hash !== self.userApiHash) {
-						self.clients = clients.data.items || [];
-						self.environment = clients.data.environment;
-					}
-
-					self.userApiHash = clients.data.hash;
-					self.state = "done";
-				} else {
-					console.error(`Error fetching from server: ${clients.error}`);
-					self.state = "error";
-				}
-			} catch (error) {
-				console.error(`Failed to fetch clients: ${error}`);
-				self.state = "error";
-			}
-		});
-
-		const fetchClient = flow(function* (phone: string) {
-			try {
-				const apiService = ApiService.getInstance();
-				const client = yield apiService.getClient(phone);
-				if (client.success) {
-					self.clients.replace([client.data.client]);
-				}
-			} catch (error) {
-				console.error(`Failed to fetch client: ${error}`);
-			}
-		});
+		// const fetchClient = flow(function* (phone: string) {
+		// 	try {
+		// 		const apiService = ApiService.getInstance();
+		// 		const client = yield apiService.getClient(phone);
+		// 		if (client.success) {
+		// 			self.clients.replace([client.data.client]);
+		// 		}
+		// 	} catch (error) {
+		// 		console.error(`Failed to fetch client: ${error}`);
+		// 	}
+		// });
 
 		function updateCfClient() {
 			if (self.cfClient === null) {
@@ -109,17 +112,17 @@ const TelegramModel = types
 		function updateFromSocket(message: SocketMessage) {
 			switch (message.type) {
 				case "CLIENT_START": {
-					// @ts-ignore
-					console.log(message.data)
-					self.clients = message.data.items;
+					// @ts-ignore the typing below is correct
+					self.clients = message.data.items || [];
+					self.environment = message.data.environment;
 					break;
 				}
 			}
 		}
 
 		return {
-			fetchClients,
-			fetchClient,
+			// fetchClients,
+			// fetchClient,
 			updateCfClient,
 			updateFromSocket
 		};
