@@ -5,7 +5,7 @@ import { createContext, useContext } from "react";
 import { ApiService } from "@/components/api";
 import { ClientReference, Modals } from "@/components/models/modal";
 import { GetCFEmail } from "@/app/onboarding/actions";
-import { SocketMessage } from "@/components/models/socket";
+import { SocketMessage, WebSocketStore } from "@/components/models/socket";
 
 export const AuthenticationStatus = types.model({
 	stage: types.enumeration("AuthState", [
@@ -58,9 +58,10 @@ const TelegramModel = types
 		// userApiHash: types.maybeNull(types.string),
 		clients: types.array(TelegramAccount),
 		cfClient: ClientReference,
-		state: types.enumeration("State", ["pending", "done", "error"]),
+		clientsState: types.enumeration("State", ["pending", "done"]),
 		environment: Environment,
-		modals: Modals
+		modals: Modals,
+		socket: WebSocketStore
 	})
 	.actions(self => {
 		// const fetchClients = flow(function* () {
@@ -115,6 +116,7 @@ const TelegramModel = types
 					// @ts-ignore the typing below is correct
 					self.clients = message.data.items || [];
 					self.environment = message.data.environment;
+					self.clientsState = "done";
 					break;
 				}
 			}
@@ -124,7 +126,7 @@ const TelegramModel = types
 			// fetchClients,
 			// fetchClient,
 			updateCfClient,
-			updateFromSocket
+			updateFromSocket,
 		};
 	});
 
@@ -134,9 +136,12 @@ const TelegramModel = types
 /*       performance wise one big store or multiple small stores is irrelevant just a design choice */
 export const telegramStore = TelegramModel.create({
 	clients: [],
-	state: "pending",
+	clientsState: "pending",
 	environment: "Production",
-	modals: {}
+	modals: {},
+	socket: {
+		socketState: "connecting"
+	}
 });
 
 export type TelegramInstance = Instance<typeof TelegramModel>;

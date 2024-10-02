@@ -34,7 +34,7 @@ const Onboarding = observer(() => {
 		}
 	}
 
-	if (telegramStore.state === "error") {
+	if (telegramStore.clientsState === "error") {
 		return (
 			<Card>
 				<CardBody>Failed to reach server. Please try again later.</CardBody>
