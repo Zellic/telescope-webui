@@ -32,13 +32,7 @@ const MessageActions: Record<IModalButtonActionType, (telegramStore: TelegramIns
 	},
 	'add_test_account': (telegramStore: TelegramInstance) => {
 		telegramStore.modals.clearMessage();
-		ApiService.getInstance().addTestAccount().then((result) => {
-			if (result.success) {
-				telegramStore.modals.setMessageBasic("Success", `Created test account.`);
-			} else {
-				telegramStore.modals.setMessageBasic("Error", `Couldn't create test account: ${result.error}`);
-			}
-		});
+		telegramStore.socket.addTestAccount();
 	}
 }
 

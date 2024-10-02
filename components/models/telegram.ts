@@ -5,7 +5,7 @@ import { createContext, useContext } from "react";
 import { ApiService } from "@/components/api";
 import { ClientReference, Modals } from "@/components/models/modal";
 import { GetCFEmail } from "@/app/onboarding/actions";
-import { SocketMessage, WebSocketStore } from "@/components/models/socket";
+import { SocketRecvMessage, WebSocketStore } from "@/components/models/socket";
 
 export const AuthenticationStatus = types.model({
 	stage: types.enumeration("AuthState", [
@@ -110,7 +110,7 @@ const TelegramModel = types
 			}
 		}
 
-		function updateFromSocket(message: SocketMessage) {
+		function updateFromSocket(message: SocketRecvMessage) {
 			switch (message.type) {
 				case "CLIENT_START": {
 					// @ts-ignore the typing below is correct
@@ -118,6 +118,17 @@ const TelegramModel = types
 					self.environment = message.data.environment;
 					self.clientsState = "done";
 					break;
+				}
+				case "ADD_TEST_ACCOUNT_RESPONSE": {
+					if (message.data.status === 'ERROR' && message.data.error) {
+						self.modals.setMessageBasic("Error", `Couldn't create test account: ${message.data.error}`);
+					} else {
+						self.modals.setMessageBasic("Success", `Created test account.`);
+					}
+					break;
+				}
+				case "SUBMIT_VALUE_RESPONSE": {
+					console.log("SUBMIT_VALUE_RESPONSE")
 				}
 			}
 		}

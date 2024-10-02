@@ -121,30 +121,35 @@ export const ProvideModal = observer(() => {
 					Close
 				</Button>
 				<Button color="primary" onPress={async () => {
-					try {
-						setSubmitting(true);
-						const apiService = ApiService.getInstance();
-						const authClient = telegramStore.modals.provide;
-						const submit = await apiService.submitValue(authClient?.phone!, authClient?.status.stage!, value);
-						await new Promise(r => setTimeout(r, 2000));
-						setSubmitting(false);
+					setSubmitting(true);
+					const authClient = telegramStore.modals.provide;
+					telegramStore.socket.submitValue(authClient?.phone!, authClient?.status.stage!, value);
+					setSubmitting(false);
 
-						if (submit.success) {
-							const client = telegramStore.clients.find(client => client.phone === authClient?.phone);
-							if (client) {
-								client.updateStatus({
-									...client.status,
-									inputRequired: false
-								});
-							}
-						} else {
-							console.error(`Error submitting code to server: ${submit.error}`);
-							// TODO: represent this error state
-						}
-					} catch (error) {
-						console.error("Error submitting code to server: ", error);
-						// TODO: represent this error state
-					}
+					// try {
+					// 	setSubmitting(true);
+					// 	const apiService = ApiService.getInstance();
+					// 	const authClient = telegramStore.modals.provide;
+					// 	const submit = await apiService.submitValue(authClient?.phone!, authClient?.status.stage!, value);
+					// 	await new Promise(r => setTimeout(r, 2000));
+					// 	setSubmitting(false);
+					//
+					// 	if (submit.success) {
+					// 		const client = telegramStore.clients.find(client => client.phone === authClient?.phone);
+					// 		if (client) {
+					// 			client.updateStatus({
+					// 				...client.status,
+					// 				inputRequired: false
+					// 			});
+					// 		}
+					// 	} else {
+					// 		console.error(`Error submitting code to server: ${submit.error}`);
+					// 		// TODO: represent this error state
+					// 	}
+					// } catch (error) {
+					// 	console.error("Error submitting code to server: ", error);
+					// 	// TODO: represent this error state
+					// }
 
 					telegramStore.modals.setProvideClient(null);
 					setValue("");
