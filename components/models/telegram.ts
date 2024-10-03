@@ -5,7 +5,8 @@ import { createContext, useContext } from "react";
 import { ApiService } from "@/components/api";
 import { ClientReference, Modals } from "@/components/models/modal";
 import { GetCFEmail } from "@/app/onboarding/actions";
-import { SocketRecvMessage, WebSocketStore } from "@/components/models/socket";
+import { WebSocketStore } from "@/components/models/socket";
+import { MessageRecvType, SocketRecvMessage } from "@/components/models/recv";
 
 export const AuthenticationStatus = types.model({
 	stage: types.enumeration("AuthState", [
@@ -18,7 +19,8 @@ export const AuthenticationStatus = types.model({
 		"AuthorizationSuccess",
 		"ConnectionClosed",
 		"ErrorOccurred",
-		"PhoneNumberRequired"
+		"PhoneNumberRequired",
+		"RegistrationRequired"
 	]),
 	inputRequired: types.boolean,
 	error: types.maybeNull(types.string)
@@ -111,24 +113,61 @@ const TelegramModel = types
 		}
 
 		function updateFromSocket(message: SocketRecvMessage) {
+			console.log(message.type)
 			switch (message.type) {
-				case "CLIENT_START": {
+				case MessageRecvType.CLIENT_START: {
 					// @ts-ignore the typing below is correct
 					self.clients = message.data.items || [];
 					self.environment = message.data.environment;
 					self.clientsState = "done";
 					break;
 				}
-				case "ADD_TEST_ACCOUNT_RESPONSE": {
-					if (message.data.status === 'ERROR' && message.data.error) {
+				case MessageRecvType.ADD_TEST_ACCOUNT_RESPONSE: {
+					self.socket.responseStatus = 'received'
+					if (message.data.status === 'ERROR') {
 						self.modals.setMessageBasic("Error", `Couldn't create test account: ${message.data.error}`);
 					} else {
 						self.modals.setMessageBasic("Success", `Created test account.`);
 					}
 					break;
 				}
-				case "SUBMIT_VALUE_RESPONSE": {
-					console.log("SUBMIT_VALUE_RESPONSE")
+				case MessageRecvType.SUBMIT_VALUE_RESPONSE: {
+					self.socket.responseStatus = 'received'
+					if (message.data.status === 'ERROR') {
+						console.error(`SUBMIT_VALUE_RESPONSE: ${message.data.error}`);
+					}
+					break;
+				}
+				case MessageRecvType.DELETE_ACCOUNT_RESPONSE: {
+					self.modals.setDeleteClient(null);
+					self.socket.responseStatus = 'received'
+
+					if (message.data.status === 'ERROR') {
+						self.modals.setMessageBasic(
+							"Error",
+							`Failed to delete account: ${message.data.error}`
+						);
+					}
+
+					break;
+				}
+				case MessageRecvType.CONNECT_CLIENT_RESPONSE: {
+					self.socket.responseStatus = 'received'
+					if (message.data.status === 'ERROR') {
+						self.modals.setMessageBasic("Error", `Couldn't connect account: ${message.data.error}`);
+					} else {
+						self.modals.setMessageBasic("Success", `Connected account.`);
+					}
+					break;
+				}
+				case MessageRecvType.DISCONNECT_CLIENT_RESPONSE: {
+					self.socket.responseStatus = 'received'
+					if (message.data.status === 'ERROR') {
+						self.modals.setMessageBasic("Error", `Couldn't disconnect account: ${message.data.error}`);
+					} else {
+						self.modals.setMessageBasic("Success", `Disconnected account.`);
+					}
+					break;
 				}
 			}
 		}
@@ -151,7 +190,8 @@ export const telegramStore = TelegramModel.create({
 	environment: "Production",
 	modals: {},
 	socket: {
-		socketState: "connecting"
+		socketState: "connecting",
+		responseStatus: "received"
 	}
 });
 

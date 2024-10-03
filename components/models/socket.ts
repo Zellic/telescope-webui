@@ -1,61 +1,10 @@
-import { IEnvironment, ITelegramAccount } from "@/components/models/telegram";
 import { getRoot, types } from "mobx-state-tree";
-
-export enum MessageRecvType {
-	CLIENT_START = "CLIENT_START",
-	ADD_TEST_ACCOUNT_RESPONSE = "ADD_TEST_ACCOUNT_RESPONSE",
-	SUBMIT_VALUE_RESPONSE = "SUBMIT_VALUE_RESPONSE"
-}
-
-export interface ClientStart {
-	type: MessageRecvType.CLIENT_START;
-	data: {
-		hash: string;
-		environment: IEnvironment;
-		items: Array<ITelegramAccount> | undefined
-	};
-}
-
-export interface GenericResponse {
-	data: {
-		status: "OK" | "ERROR",
-		error: null | string;
-	};
-}
-
-export type AddTestAccountResponse = {
-	type: MessageRecvType.ADD_TEST_ACCOUNT_RESPONSE;
-} & GenericResponse;
-
-export type SubmitValueResponse = {
-	type: MessageRecvType.SUBMIT_VALUE_RESPONSE;
-} & GenericResponse;
-
-export type SocketRecvMessage = ClientStart | AddTestAccountResponse | SubmitValueResponse;
-
-export enum MessageSendType {
-	ADD_TEST_ACCOUNT = "ADD_TEST_ACCOUNT",
-	SUBMIT_VALUE = "SUBMIT_VALUE",
-}
-
-export interface AddTestAccount {
-	type: MessageSendType.ADD_TEST_ACCOUNT;
-}
-
-export interface SubmitValue {
-	type: MessageSendType.SUBMIT_VALUE;
-	data: {
-		phone: string;
-		stage: string;
-		value: string;
-	};
-}
-
-export type SocketSendMessage = AddTestAccount | SubmitValue;
+import { MessageSendType, SocketSendMessage } from "@/components/models/send";
 
 export const WebSocketStore = types
 	.model({
-		socketState: types.enumeration(["connecting", "open", "closed", "error"])
+		socketState: types.enumeration(["connecting", "open", "closed", "error"]),
+		responseStatus: types.enumeration(["waiting", "received"]),
 	})
 	.volatile((self) => ({
 		socket: null as WebSocket | null
@@ -87,6 +36,7 @@ export const WebSocketStore = types
 
 			self.socket.onmessage = (event) => {
 				const message = JSON.parse(event.data);
+				console.log(message)
 				if (message.hasOwnProperty("type")) {
 					// @ts-ignore: dont want to include the type (circular)
 					getRoot(self).updateFromSocket(message);
@@ -119,6 +69,45 @@ export const WebSocketStore = types
 					value
 				}
 			});
+		},
+
+		deleteAccount(phone: string) {
+			this.sendMessage({
+				type: MessageSendType.DELETE_ACCOUNT,
+				data: {
+					phone
+				}
+			});
+		},
+
+		disconnectClient(phone: string) {
+			this.sendMessage({
+				type: MessageSendType.DISCONNECT_CLIENT,
+				data: {
+					phone
+				}
+			});
+		},
+
+		connectClient(phone: string) {
+			this.sendMessage({
+				type: MessageSendType.CONNECT_CLIENT,
+				data: {
+					phone
+				}
+			});
+		},
+
+		// note: we dont set this always within here, because we dont always need to 'wait' on a response
+		// this should be done per use within the component if you want a waiting state.
+		setWaiting() {
+			self.responseStatus = 'waiting';
+		},
+
+		// note: on the flipside of this we always want to know if we received a response
+		// this should not be called by ANY components. only the socket callback should update this
+		setReceived() {
+			self.responseStatus = 'received';
 		},
 
 		disconnect() {
