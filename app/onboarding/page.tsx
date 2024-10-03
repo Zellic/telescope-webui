@@ -17,15 +17,14 @@ const Onboarding = observer(() => {
 	const telegramStore = useTelegramStore();
 	const searchParams = useSearchParams();
 
-	useAsyncIntervalForeground(
-		2500, // update a bit faster for one person
-		async () => {
-			// this should only display the client we have view permissions upon (CF SSO)
-			await telegramStore.fetchClients();
-			telegramStore.updateCfClient();
-		},
-		[telegramStore]
-	);
+	useEffect(() => {
+		const url = 'ws://localhost:8888/socket';
+		telegramStore.socket.connect(url);
+
+		return () => {
+			telegramStore.socket.disconnect();
+		};
+	}, [])
 
 	if (telegramStore.cfClient?.status.stage === "AuthorizationSuccess") {
 		const url = searchParams.get("redirect");
@@ -34,12 +33,12 @@ const Onboarding = observer(() => {
 		}
 	}
 
-	if (telegramStore.clientsState === "error") {
+	if (telegramStore.socket.socketState === 'error') {
 		return (
 			<Card>
 				<CardBody>Failed to reach server. Please try again later.</CardBody>
 			</Card>
-		);
+		)
 	}
 
 	return (

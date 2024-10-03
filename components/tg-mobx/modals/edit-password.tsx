@@ -78,17 +78,7 @@ export const EditPasswordModal = observer(() => {
 												        setValue("");
 												        setConfirm("");
 
-												        // dont want phone object to get lost when client goes null
-												        (async function(phone) {
-													        const result = await ApiService.getInstance().setpassword(phone, password);
-
-													        if (!result.success) {
-														        telegramStore.modals.setMessageBasic(
-															        "Error",
-															        `Failed to edit account password for ${phone}: ${result.error}`
-														        );
-													        }
-												        })(telegramStore.modals.editPassword.phone);
+														telegramStore.socket.setPassword(telegramStore.modals.editPassword.phone, password);
 
 												        telegramStore.modals.setEditPasswordClient(null);
 											        }}>

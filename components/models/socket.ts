@@ -4,7 +4,7 @@ import { MessageSendType, SocketSendMessage } from "@/components/models/send";
 export const WebSocketStore = types
 	.model({
 		socketState: types.enumeration(["connecting", "open", "closed", "error"]),
-		responseStatus: types.enumeration(["waiting", "received"]),
+		responseStatus: types.enumeration(["waiting", "received"])
 	})
 	.volatile((self) => ({
 		socket: null as WebSocket | null
@@ -36,7 +36,7 @@ export const WebSocketStore = types
 
 			self.socket.onmessage = (event) => {
 				const message = JSON.parse(event.data);
-				console.log(message)
+				console.log(message);
 				if (message.hasOwnProperty("type")) {
 					// @ts-ignore: dont want to include the type (circular)
 					getRoot(self).updateFromSocket(message);
@@ -52,6 +52,19 @@ export const WebSocketStore = types
 			} else {
 				console.error(`Failed to send message: WebSocket is closed`);
 			}
+		},
+
+		addAccount(phone: string,
+		           email: string | null,
+		           comment: string | null) {
+			this.sendMessage({
+				type: MessageSendType.ADD_ACCOUNT,
+				data: {
+					phone,
+					email,
+					comment,
+				}
+			});
 		},
 
 		addTestAccount() {
@@ -98,16 +111,26 @@ export const WebSocketStore = types
 			});
 		},
 
+		setPassword(phone: string, password: string) {
+			this.sendMessage({
+				type: MessageSendType.SET_PASSWORD,
+				data: {
+					phone,
+					password
+				}
+			})
+		},
+
 		// note: we dont set this always within here, because we dont always need to 'wait' on a response
 		// this should be done per use within the component if you want a waiting state.
 		setWaiting() {
-			self.responseStatus = 'waiting';
+			self.responseStatus = "waiting";
 		},
 
 		// note: on the flipside of this we always want to know if we received a response
 		// this should not be called by ANY components. only the socket callback should update this
 		setReceived() {
-			self.responseStatus = 'received';
+			self.responseStatus = "received";
 		},
 
 		disconnect() {
