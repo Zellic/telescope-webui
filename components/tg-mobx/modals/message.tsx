@@ -21,13 +21,7 @@ const MessageActions: Record<IModalButtonActionType, (telegramStore: TelegramIns
 		telegramStore.modals.clearMessage();
 
 		if (client) {
-			ApiService.getInstance().disconnectClient(client.phone).then((result) => {
-				if (result.success) {
-					telegramStore.modals.setMessageBasic("Success", `Disconnected account ${client.phone}.`);
-				} else {
-					telegramStore.modals.setMessageBasic("Error", `Couldn't disconnect account ${client.phone}: ${result.error}`);
-				}
-			});
+			telegramStore.socket.disconnectClient(client.phone);
 		}
 	},
 	'add_test_account': (telegramStore: TelegramInstance) => {

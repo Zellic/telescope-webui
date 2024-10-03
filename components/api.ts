@@ -73,18 +73,6 @@ export class ApiService {
 		}
 	}
 
-	public async connectClient(phone: string): Promise<Result<MessageResult>> {
-		return this.request<MessageResult>("/tgconnect?phone=" + phone);
-	}
-
-	public async disconnectClient(phone: string): Promise<Result<MessageResult>> {
-		return this.request<MessageResult>("/tgdisconnect?phone=" + phone);
-	}
-
-	public async deleteaccount(phone: string): Promise<Result<MessageResult>> {
-		return this.request<MessageResult>("/deleteaccount?phone=" + phone);
-	}
-
 	public async setpassword(phone: string, password: string): Promise<Result<MessageResult>> {
 		return this.request<{ message: string }>("/setpassword?phone=" + phone, {
 			method: "POST",
@@ -92,16 +80,6 @@ export class ApiService {
 				"Content-Type": "application/json"
 			},
 			body: JSON.stringify({ password })
-		});
-	}
-
-	public async submitValue(phone: string, stage: string, value: string): Promise<Result<{ message: string }>> {
-		return this.request<{ message: string }>("/submitvalue", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({ phone, stage, value })
 		});
 	}
 

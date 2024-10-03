@@ -10,7 +10,6 @@ import { NameCell } from "@/components/tg-mobx/account-table";
 export const DeleteAccountModal = observer(() => {
 	const telegramStore = useTelegramStore();
 	const [value, setValue] = useState("");
-	const [submitting, setSubmitting] = useState(false);
 
 	const isOpen = telegramStore.modals.deleteClient !== null;
 
@@ -25,7 +24,7 @@ export const DeleteAccountModal = observer(() => {
 			onClose={onClose}
 			header={"Remove account"}
 			body={
-				submitting ?
+				telegramStore.socket.responseStatus === 'waiting' ?
 					<>
 						<p>Deleting...</p>
 					</>
@@ -38,7 +37,7 @@ export const DeleteAccountModal = observer(() => {
 					</>
 			}
 			footer={
-				submitting ?
+				telegramStore.socket.responseStatus === 'waiting' ?
 					<>
 						<Spinner/>
 					</>
@@ -62,26 +61,10 @@ export const DeleteAccountModal = observer(() => {
 							<div className="flex flex-row gap-2">
 								<Button color="danger" isDisabled={value.toUpperCase() != "DELETE"} onPress={() => {
 									setValue("");
-									setSubmitting(true);
 
 									const phone = telegramStore.modals.deleteClient!.phone;
-									ApiService.getInstance().deleteaccount(phone).then(res => {
-										setSubmitting(false);
-										telegramStore.modals.setDeleteClient(null);
-										if (!res.success) {
-											telegramStore.modals.setMessageBasic(
-												"Error",
-												`Failed to delete account: ${res.error}`
-											);
-										}
-									}).catch(res => {
-										setSubmitting(false);
-										telegramStore.modals.setDeleteClient(null);
-										telegramStore.modals.setMessageBasic(
-											"Error", "Failed to reach server"
-										);
-									});
-
+									telegramStore.socket.setWaiting()
+									telegramStore.socket.deleteAccount(phone);
 								}}>
 									Delete User
 								</Button>

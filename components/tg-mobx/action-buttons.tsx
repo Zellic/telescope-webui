@@ -45,13 +45,7 @@ export const ConnectionButtons = observer(({ account, onboarding }: { account: I
 			               icon={MdOutlineLogin}
 			               disabled={onboarding}
 			               onClick={() => {
-				               ApiService.getInstance().connectClient(account.phone).then((result) => {
-					               if (result.success) {
-						               telegramStore.modals.setMessageBasic("Success", `Connected account ${account.phone}.`);
-					               } else {
-						               telegramStore.modals.setMessageBasic("Error", `Couldn't connect account ${account.phone}: ${result.error}`);
-					               }
-				               });
+							   telegramStore.socket.connectClient(account.phone);
 			               }} />
 		);
 	} else {
