@@ -66,46 +66,6 @@ const TelegramModel = types
 		socket: WebSocketStore
 	})
 	.actions(self => {
-		// const fetchClients = flow(function* () {
-		// 	// note: we don't reset the state to 'pending' as our default state is pending
-		// 	//       and we don't want to show a spinner on every client fetch (this should happen
-		// 	//       in the background)
-		// 	// self.state = 'pending'
-		//
-		// 	try {
-		// 		const apiService = ApiService.getInstance();
-		// 		const clients = yield apiService.getClients(self.userApiHash);
-		//
-		// 		if (clients.success) {
-		// 			if (clients.data.hash !== self.userApiHash) {
-		// 				self.clients = clients.data.items || [];
-		// 				self.environment = clients.data.environment;
-		// 			}
-		//
-		// 			self.userApiHash = clients.data.hash;
-		// 			self.state = "done";
-		// 		} else {
-		// 			console.error(`Error fetching from server: ${clients.error}`);
-		// 			self.state = "error";
-		// 		}
-		// 	} catch (error) {
-		// 		console.error(`Failed to fetch clients: ${error}`);
-		// 		self.state = "error";
-		// 	}
-		// });
-
-		// const fetchClient = flow(function* (phone: string) {
-		// 	try {
-		// 		const apiService = ApiService.getInstance();
-		// 		const client = yield apiService.getClient(phone);
-		// 		if (client.success) {
-		// 			self.clients.replace([client.data.client]);
-		// 		}
-		// 	} catch (error) {
-		// 		console.error(`Failed to fetch client: ${error}`);
-		// 	}
-		// });
-
 		function updateCfClient() {
 			if (self.cfClient === null) {
 				self.cfClient = self.clients.find(u => u.email === GetCFEmail());
@@ -113,7 +73,7 @@ const TelegramModel = types
 		}
 
 		function updateFromSocket(message: SocketRecvMessage) {
-			console.log(message.type)
+			console.log(message.type);
 			switch (message.type) {
 				case MessageRecvType.CLIENT_START: {
 					// @ts-ignore the typing below is correct
@@ -122,9 +82,19 @@ const TelegramModel = types
 					self.clientsState = "done";
 					break;
 				}
-				case MessageRecvType.ADD_TEST_ACCOUNT_RESPONSE: {
-					self.socket.responseStatus = 'received'
+				case MessageRecvType.ADD_ACCOUNT_RESPONSE: {
+					self.socket.responseStatus = "received";
 					if (message.data.status === 'ERROR') {
+						self.modals.setMessageBasic(
+							"Error",
+							`Failed to add account: ${message.data.error}`
+						);
+					}
+					break;
+				}
+				case MessageRecvType.ADD_TEST_ACCOUNT_RESPONSE: {
+					self.socket.responseStatus = "received";
+					if (message.data.status === "ERROR") {
 						self.modals.setMessageBasic("Error", `Couldn't create test account: ${message.data.error}`);
 					} else {
 						self.modals.setMessageBasic("Success", `Created test account.`);
@@ -132,17 +102,17 @@ const TelegramModel = types
 					break;
 				}
 				case MessageRecvType.SUBMIT_VALUE_RESPONSE: {
-					self.socket.responseStatus = 'received'
-					if (message.data.status === 'ERROR') {
+					self.socket.responseStatus = "received";
+					if (message.data.status === "ERROR") {
 						console.error(`SUBMIT_VALUE_RESPONSE: ${message.data.error}`);
 					}
 					break;
 				}
 				case MessageRecvType.DELETE_ACCOUNT_RESPONSE: {
 					self.modals.setDeleteClient(null);
-					self.socket.responseStatus = 'received'
+					self.socket.responseStatus = "received";
 
-					if (message.data.status === 'ERROR') {
+					if (message.data.status === "ERROR") {
 						self.modals.setMessageBasic(
 							"Error",
 							`Failed to delete account: ${message.data.error}`
@@ -152,8 +122,8 @@ const TelegramModel = types
 					break;
 				}
 				case MessageRecvType.CONNECT_CLIENT_RESPONSE: {
-					self.socket.responseStatus = 'received'
-					if (message.data.status === 'ERROR') {
+					self.socket.responseStatus = "received";
+					if (message.data.status === "ERROR") {
 						self.modals.setMessageBasic("Error", `Couldn't connect account: ${message.data.error}`);
 					} else {
 						self.modals.setMessageBasic("Success", `Connected account.`);
@@ -161,11 +131,21 @@ const TelegramModel = types
 					break;
 				}
 				case MessageRecvType.DISCONNECT_CLIENT_RESPONSE: {
-					self.socket.responseStatus = 'received'
-					if (message.data.status === 'ERROR') {
+					self.socket.responseStatus = "received";
+					if (message.data.status === "ERROR") {
 						self.modals.setMessageBasic("Error", `Couldn't disconnect account: ${message.data.error}`);
 					} else {
 						self.modals.setMessageBasic("Success", `Disconnected account.`);
+					}
+					break;
+				}
+				case MessageRecvType.SET_PASSWORD_RESPONSE: {
+					self.socket.responseStatus = "received";
+					if (message.data.status === "ERROR") {
+						self.modals.setMessageBasic(
+							"Error",
+							`Failed to edit account password for: ${message.data.error}`
+						);
 					}
 					break;
 				}
@@ -173,10 +153,8 @@ const TelegramModel = types
 		}
 
 		return {
-			// fetchClients,
-			// fetchClient,
 			updateCfClient,
-			updateFromSocket,
+			updateFromSocket
 		};
 	});
 
