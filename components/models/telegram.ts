@@ -4,7 +4,6 @@ import { flow, Instance, ISimpleType, onSnapshot, types } from "mobx-state-tree"
 import { createContext, useContext } from "react";
 import { ApiService } from "@/components/api";
 import { ClientReference, Modals } from "@/components/models/modal";
-import { GetCFEmail } from "@/app/onboarding/actions";
 import { WebSocketStore } from "@/components/models/socket";
 import { MessageRecvType, SocketRecvMessage } from "@/components/models/recv";
 

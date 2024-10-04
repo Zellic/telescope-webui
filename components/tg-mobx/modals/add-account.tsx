@@ -5,7 +5,6 @@ import React, { useEffect, useState } from "react";
 import { Input } from "@nextui-org/input";
 import { Button, Spinner } from "@nextui-org/react";
 import { ApiService } from "@/components/api";
-import { GetCFEmail } from "@/app/onboarding/actions";
 
 function valueOrNull(s: string | undefined | null): string | null {
 	if (s && s.length > 0)
@@ -22,7 +21,7 @@ export const AddAccountModal = observer(() => {
 
 	useEffect(() => {
 		if (telegramStore.modals.addAccount === "onboarding") {
-			setEmail(GetCFEmail() || "");
+			setEmail(telegramStore.ssoEmail || "");
 		}
 	}, [telegramStore.modals.addAccount]);
 

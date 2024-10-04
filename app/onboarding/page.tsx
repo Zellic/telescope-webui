@@ -11,7 +11,6 @@ import TelegramAccountTable, { AuthenticationCell, NameCell, StatusCell } from "
 import { ProvideModal } from "@/components/tg-mobx/modals/provide";
 import { redirect, useSearchParams } from "next/navigation";
 import { Card, CardBody } from "@nextui-org/card";
-import { GetCFEmail } from "@/app/onboarding/actions";
 
 const Onboarding = observer(() => {
 	const telegramStore = useTelegramStore();
