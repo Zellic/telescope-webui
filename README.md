@@ -28,7 +28,3 @@ npm run dev
 ```bash
 next build
 ```
-
-## License
-
-TODO
