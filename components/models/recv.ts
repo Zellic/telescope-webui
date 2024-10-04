@@ -1,6 +1,7 @@
 import { IEnvironment, ITelegramAccount } from "@/components/models/telegram";
 
 export enum MessageRecvType {
+	SSO_START = "SSO_START",
 	CLIENT_START = "CLIENT_START",
 	ADD_ACCOUNT_RESPONSE = "ADD_ACCOUNT_RESPONSE",
 	ADD_TEST_ACCOUNT_RESPONSE = "ADD_TEST_ACCOUNT_RESPONSE",
@@ -17,6 +18,9 @@ interface GenericResponseData {
 }
 
 interface MessageDataMap {
+	[MessageRecvType.SSO_START]: {
+		email: string;
+	};
 	[MessageRecvType.CLIENT_START]: {
 		hash: string;
 		environment: IEnvironment;

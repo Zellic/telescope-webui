@@ -59,19 +59,14 @@ const TelegramModel = types
 	.model({
 		// userApiHash: types.maybeNull(types.string),
 		clients: types.array(TelegramAccount),
-		cfClient: ClientReference,
+		ssoClient: ClientReference,
+		ssoEmail: types.maybeNull(types.string),
 		clientsState: types.enumeration("State", ["pending", "done"]),
 		environment: Environment,
 		modals: Modals,
 		socket: WebSocketStore
 	})
 	.actions(self => {
-		function updateCfClient() {
-			if (self.cfClient === null) {
-				self.cfClient = self.clients.find(u => u.email === GetCFEmail());
-			}
-		}
-
 		function updateFromSocket(message: SocketRecvMessage) {
 			console.log(message.type);
 			switch (message.type) {
@@ -80,6 +75,11 @@ const TelegramModel = types
 					self.clients = message.data.items || [];
 					self.environment = message.data.environment;
 					self.clientsState = "done";
+					break;
+				}
+				case MessageRecvType.SSO_START: {
+					self.ssoEmail = message.data.email;
+					self.ssoClient = self.clients.find(u => u.email === self.ssoEmail);
 					break;
 				}
 				case MessageRecvType.ADD_ACCOUNT_RESPONSE: {
@@ -153,7 +153,6 @@ const TelegramModel = types
 		}
 
 		return {
-			updateCfClient,
 			updateFromSocket
 		};
 	});
