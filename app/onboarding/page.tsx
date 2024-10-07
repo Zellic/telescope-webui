@@ -11,35 +11,33 @@ import TelegramAccountTable, { AuthenticationCell, NameCell, StatusCell } from "
 import { ProvideModal } from "@/components/tg-mobx/modals/provide";
 import { redirect, useSearchParams } from "next/navigation";
 import { Card, CardBody } from "@nextui-org/card";
-import { GetCFEmail } from "@/app/onboarding/actions";
 
 const Onboarding = observer(() => {
 	const telegramStore = useTelegramStore();
 	const searchParams = useSearchParams();
 
-	useAsyncIntervalForeground(
-		2500, // update a bit faster for one person
-		async () => {
-			// this should only display the client we have view permissions upon (CF SSO)
-			await telegramStore.fetchClients();
-			telegramStore.updateCfClient();
-		},
-		[telegramStore]
-	);
+	useEffect(() => {
+		const url = 'ws://localhost:8888/socket';
+		telegramStore.socket.connect(url);
 
-	if (telegramStore.cfClient?.status.stage === "AuthorizationSuccess") {
+		return () => {
+			telegramStore.socket.disconnect();
+		};
+	}, [])
+
+	if (telegramStore.ssoClient?.status.stage === "AuthorizationSuccess") {
 		const url = searchParams.get("redirect");
 		if (url) {
 			redirect(url);
 		}
 	}
 
-	if (telegramStore.state === "error") {
+	if (telegramStore.socket.socketState === 'error') {
 		return (
 			<Card>
 				<CardBody>Failed to reach server. Please try again later.</CardBody>
 			</Card>
-		);
+		)
 	}
 
 	return (
@@ -50,7 +48,7 @@ const Onboarding = observer(() => {
 
 			<div className="text-center mb-4">
 				<h1 className="text-4xl font-bold mb-4">Telescope Onboarding</h1>
-				{!telegramStore.cfClient &&
+				{!telegramStore.ssoClient &&
                   <Button
                     size="lg"
                     color={"primary"}
@@ -63,26 +61,26 @@ const Onboarding = observer(() => {
                   </Button>
 				}
 			</div>
-			{telegramStore.cfClient && telegramStore.cfClient.status.stage !== "AuthorizationSuccess" &&
+			{telegramStore.ssoClient && telegramStore.ssoClient.status.stage !== "AuthorizationSuccess" &&
               <div className="flex flex-col items-center">
                 <p className={"text-large mb-8 text-center"}>Click provide to begin authorization of your Telegram
                   account.</p>
                 <Card className={"max-w-[400px] min-w-[300px] p-2"}>
                   <CardBody className={"flex flex-row items-start justify-center"}>
                     <div className={"flex flex-col"}>
-                      <NameCell account={telegramStore.cfClient} />
+                      <NameCell account={telegramStore.ssoClient} />
                       <div className={"mt-2"}>
-                        <StatusCell account={telegramStore.cfClient} />
+                        <StatusCell account={telegramStore.ssoClient} />
                       </div>
                     </div>
                     <div className={"flex items-center mt-4"}>
-                      <AuthenticationCell account={telegramStore.cfClient} />
+                      <AuthenticationCell account={telegramStore.ssoClient} />
                     </div>
                   </CardBody>
                 </Card>
               </div>
 			}
-			{telegramStore.cfClient && telegramStore.cfClient.status.stage === "AuthorizationSuccess" &&
+			{telegramStore.ssoClient && telegramStore.ssoClient.status.stage === "AuthorizationSuccess" &&
               <Card className={"max-w-[500px]"} fullWidth={true}>
                 <CardBody>
                   <h1>You have already been onboarded :)</h1>

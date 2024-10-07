@@ -4,7 +4,8 @@ import { flow, Instance, ISimpleType, onSnapshot, types } from "mobx-state-tree"
 import { createContext, useContext } from "react";
 import { ApiService } from "@/components/api";
 import { ClientReference, Modals } from "@/components/models/modal";
-import { GetCFEmail } from "@/app/onboarding/actions";
+import { WebSocketStore } from "@/components/models/socket";
+import { MessageRecvType, SocketRecvMessage } from "@/components/models/recv";
 
 export const AuthenticationStatus = types.model({
 	stage: types.enumeration("AuthState", [
@@ -18,6 +19,7 @@ export const AuthenticationStatus = types.model({
 		"ConnectionClosed",
 		"ErrorOccurred",
 		"PhoneNumberRequired",
+		"RegistrationRequired"
 	]),
 	inputRequired: types.boolean,
 	error: types.maybeNull(types.string)
@@ -25,7 +27,7 @@ export const AuthenticationStatus = types.model({
 
 export type IAuthenticationStatus = Instance<typeof AuthenticationStatus>;
 export type IAuthStage = IAuthenticationStatus["stage"];
-export const Privilege = types.enumeration("Privileges", ["view", "edit_two_factor_password", "login", "manage_connection_state", "remove_account"])
+export const Privilege = types.enumeration("Privileges", ["view", "edit_two_factor_password", "login", "manage_connection_state", "remove_account"]);
 export type PrivilegeUnion = typeof Privilege extends ISimpleType<infer U> ? U : never;
 
 export const TelegramAccount = types.model({
@@ -39,7 +41,7 @@ export const TelegramAccount = types.model({
 		date: types.number
 	})),
 	status: AuthenticationStatus,
-	privileges: types.array(Privilege),
+	privileges: types.array(Privilege)
 })
 	.actions((self) => ({
 		updateStatus(status: IAuthenticationStatus) {
@@ -49,66 +51,108 @@ export const TelegramAccount = types.model({
 
 export type ITelegramAccount = Instance<typeof TelegramAccount>;
 
+export const Environment = types.enumeration("Environment", ["Staging", "Production"]);
+export type IEnvironment = Instance<typeof Environment>
+
 const TelegramModel = types
 	.model({
-		userApiHash: types.maybeNull(types.string),
+		// userApiHash: types.maybeNull(types.string),
 		clients: types.array(TelegramAccount),
-		cfClient: ClientReference,
-		state: types.enumeration("State", ["pending", "done", "error"]),
-		environment: types.enumeration("Environment", ["Staging", "Production"]),
+		ssoClient: ClientReference,
+		ssoEmail: types.maybeNull(types.string),
+		clientsState: types.enumeration("State", ["pending", "done"]),
+		environment: Environment,
 		modals: Modals,
+		socket: WebSocketStore
 	})
 	.actions(self => {
-		const fetchClients = flow(function* () {
-			// note: we don't reset the state to 'pending' as our default state is pending
-			//       and we don't want to show a spinner on every client fetch (this should happen
-			//       in the background)
-			// self.state = 'pending'
+		function updateFromSocket(message: SocketRecvMessage) {
+			console.log(message.type);
+			switch (message.type) {
+				case MessageRecvType.CLIENT_START: {
+					// @ts-ignore the typing below is correct
+					self.clients = message.data.items || [];
+					self.environment = message.data.environment;
+					self.clientsState = "done";
+					break;
+				}
+				case MessageRecvType.SSO_START: {
+					self.ssoEmail = message.data.email;
+					self.ssoClient = self.clients.find(u => u.email === self.ssoEmail);
+					break;
+				}
+				case MessageRecvType.ADD_ACCOUNT_RESPONSE: {
+					self.socket.responseStatus = "received";
+					if (message.data.status === 'ERROR') {
+						self.modals.setMessageBasic(
+							"Error",
+							`Failed to add account: ${message.data.error}`
+						);
+					}
+					break;
+				}
+				case MessageRecvType.ADD_TEST_ACCOUNT_RESPONSE: {
+					self.socket.responseStatus = "received";
+					if (message.data.status === "ERROR") {
+						self.modals.setMessageBasic("Error", `Couldn't create test account: ${message.data.error}`);
+					} else {
+						self.modals.setMessageBasic("Success", `Created test account.`);
+					}
+					break;
+				}
+				case MessageRecvType.SUBMIT_VALUE_RESPONSE: {
+					self.socket.responseStatus = "received";
+					if (message.data.status === "ERROR") {
+						console.error(`SUBMIT_VALUE_RESPONSE: ${message.data.error}`);
+					}
+					break;
+				}
+				case MessageRecvType.DELETE_ACCOUNT_RESPONSE: {
+					self.modals.setDeleteClient(null);
+					self.socket.responseStatus = "received";
 
-			try {
-				const apiService = ApiService.getInstance();
-				const clients = yield apiService.getClients(self.userApiHash);
-
-				if (clients.success) {
-					if (clients.data.hash !== self.userApiHash) {
-						self.clients = clients.data.items || [];
-						self.environment = clients.data.environment
+					if (message.data.status === "ERROR") {
+						self.modals.setMessageBasic(
+							"Error",
+							`Failed to delete account: ${message.data.error}`
+						);
 					}
 
-					self.userApiHash = clients.data.hash;
-					self.state = "done";
-				} else {
-					console.error(`Error fetching from server: ${clients.error}`);
-					self.state = "error";
+					break;
 				}
-			} catch (error) {
-				console.error(`Failed to fetch clients: ${error}`);
-				self.state = "error";
-			}
-		});
-
-		const fetchClient = flow(function* (phone: string) {
-			try {
-				const apiService = ApiService.getInstance();
-				const client = yield apiService.getClient(phone);
-				if (client.success) {
-					self.clients.replace([client.data.client])
+				case MessageRecvType.CONNECT_CLIENT_RESPONSE: {
+					self.socket.responseStatus = "received";
+					if (message.data.status === "ERROR") {
+						self.modals.setMessageBasic("Error", `Couldn't connect account: ${message.data.error}`);
+					} else {
+						self.modals.setMessageBasic("Success", `Connected account.`);
+					}
+					break;
 				}
-			} catch (error) {
-				console.error(`Failed to fetch client: ${error}`)
-			}
-		});
-
-		function updateCfClient() {
-			if (self.cfClient === null) {
-				self.cfClient = self.clients.find(u => u.email === GetCFEmail())
+				case MessageRecvType.DISCONNECT_CLIENT_RESPONSE: {
+					self.socket.responseStatus = "received";
+					if (message.data.status === "ERROR") {
+						self.modals.setMessageBasic("Error", `Couldn't disconnect account: ${message.data.error}`);
+					} else {
+						self.modals.setMessageBasic("Success", `Disconnected account.`);
+					}
+					break;
+				}
+				case MessageRecvType.SET_PASSWORD_RESPONSE: {
+					self.socket.responseStatus = "received";
+					if (message.data.status === "ERROR") {
+						self.modals.setMessageBasic(
+							"Error",
+							`Failed to edit account password for: ${message.data.error}`
+						);
+					}
+					break;
+				}
 			}
 		}
 
 		return {
-			fetchClients,
-			fetchClient,
-			updateCfClient
+			updateFromSocket
 		};
 	});
 
@@ -118,9 +162,13 @@ const TelegramModel = types
 /*       performance wise one big store or multiple small stores is irrelevant just a design choice */
 export const telegramStore = TelegramModel.create({
 	clients: [],
-	state: "pending",
+	clientsState: "pending",
 	environment: "Production",
 	modals: {},
+	socket: {
+		socketState: "connecting",
+		responseStatus: "received"
+	}
 });
 
 export type TelegramInstance = Instance<typeof TelegramModel>;

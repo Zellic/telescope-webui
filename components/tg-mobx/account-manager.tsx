@@ -7,24 +7,23 @@ import TelegramAccountTable from "@/components/tg-mobx/account-table";
 import { Spinner } from "@nextui-org/react";
 import { Modals } from "@/components/tg-mobx/modals/modals";
 import { Button } from "@nextui-org/button";
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardBody } from "@nextui-org/card";
 
 
 const TelegramAccountManager = observer(() => {
 	const telegramStore = useTelegramStore();
 
-	useAsyncIntervalForeground(
-		5000,
-		async () => {
-			if (telegramStore.state !== 'error') {
-				await telegramStore.fetchClients();
-			}
-		},
-		[telegramStore]
-	);
+	useEffect(() => {
+		const url = 'ws://localhost:8888/socket';
+		telegramStore.socket.connect(url);
 
-	if (telegramStore.state === 'error') {
+		return () => {
+			telegramStore.socket.disconnect();
+		};
+	}, [])
+
+	if (telegramStore.socket.socketState === 'error') {
 		return (
 			<Card>
 				<CardBody>Failed to reach server. Please try again later.</CardBody>
@@ -63,7 +62,7 @@ const TelegramAccountManager = observer(() => {
 				</div>
 
 				<TelegramAccountTable />
-				{telegramStore.state === "pending" && <Spinner />}
+				{telegramStore.clientsState === "pending" && <Spinner />}
 			</div>
 		</>
 	);
