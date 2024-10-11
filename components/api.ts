@@ -20,25 +20,30 @@ export interface MessageResult {
 
 export class ApiService {
 	private static instance: ApiService;
-	private readonly baseURL: string;
+	public readonly baseURL: string;
+	public readonly wsURL: string;
 
 	private constructor() {
-		const currentProtocol = window.location.protocol;  // 'http:' or 'https:'
+		const currentProtocol = window.location.protocol;
 		const currentHostname = window.location.hostname;
 		const protocol = currentProtocol === "https:" ? "https" : "http";
+		const protocolWS = currentProtocol === "https:" ? "wss" : "ws";
 
 		// when we're running the python server and the frontend separately we'll be on localhost
 		// thus the python backend is probably running on :8888
 		if (currentHostname === "localhost") {
 			this.baseURL = `${protocol}://localhost:8888`;
-		} else {
+			this.wsURL = `${protocolWS}://localhost:8888`;
+		} else {``
 			const port = window.location.port;
 
 			if (port == "") {
 				this.baseURL = `${protocol}://${currentHostname}`;
-			} else {
+				this.wsURL = `${protocolWS}://${currentHostname}`;
+			} else {``
 				this.baseURL = `${protocol}://${currentHostname}:${port}`;
-			}
+				this.wsURL = `${protocolWS}://${currentHostname}:${port}`;
+			}``
 		}
 	}
 

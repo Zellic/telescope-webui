@@ -9,14 +9,15 @@ import { Modals } from "@/components/tg-mobx/modals/modals";
 import { Button } from "@nextui-org/button";
 import React, { useEffect } from "react";
 import { Card, CardBody } from "@nextui-org/card";
+import { ApiService } from "@/components/api";
 
 
 const TelegramAccountManager = observer(() => {
 	const telegramStore = useTelegramStore();
 
 	useEffect(() => {
-		const url = 'ws://localhost:8888/socket';
-		telegramStore.socket.connect(url);
+		const socket_url = ApiService.getInstance().wsURL + "/socket";
+		telegramStore.socket.connect(socket_url);
 
 		return () => {
 			telegramStore.socket.disconnect();

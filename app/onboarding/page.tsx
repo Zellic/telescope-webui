@@ -11,14 +11,15 @@ import TelegramAccountTable, { AuthenticationCell, NameCell, StatusCell } from "
 import { ProvideModal } from "@/components/tg-mobx/modals/provide";
 import { redirect, useSearchParams } from "next/navigation";
 import { Card, CardBody } from "@nextui-org/card";
+import { ApiService } from "@/components/api";
 
 const Onboarding = observer(() => {
 	const telegramStore = useTelegramStore();
 	const searchParams = useSearchParams();
 
 	useEffect(() => {
-		const url = 'ws://localhost:8888/socket';
-		telegramStore.socket.connect(url);
+		const socket_url = ApiService.getInstance().wsURL + "/socket";
+		telegramStore.socket.connect(socket_url);
 
 		return () => {
 			telegramStore.socket.disconnect();

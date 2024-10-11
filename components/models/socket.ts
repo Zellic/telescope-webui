@@ -1,5 +1,6 @@
 import { getRoot, types } from "mobx-state-tree";
 import { MessageSendType, SocketSendMessage } from "@/components/models/send";
+import { ApiService } from "@/components/api";
 
 export const WebSocketStore = types
 	.model({
