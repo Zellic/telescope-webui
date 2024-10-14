@@ -7,7 +7,35 @@ import { Input } from "@nextui-org/input";
 import { ApiService } from "@/components/api";
 import { NameCell } from "@/components/tg-mobx/account-table";
 
-const WHITESPACE = /\s/g;
+export const WHITESPACE = /\s/g;
+
+export const EditPasswordInput = observer((props: {
+	value: string,
+	onValueChange: (value: any) => void,
+	valueConfirm: string,
+	onValueChangeConfirm: (value: any) => void
+}) => {
+	return <>
+		<Input
+			isRequired={true}
+			type="password"
+			label="2FA Password"
+			placeholder="Please enter the password..."
+			labelPlacement="outside"
+			value={props.value}
+			onValueChange={props.onValueChange}
+		/>
+		<Input
+			isRequired={true}
+			type="password"
+			label="Confirm"
+			placeholder="Please confirm the password..."
+			labelPlacement="outside"
+			value={props.valueConfirm}
+			onValueChange={props.onValueChangeConfirm}
+		/>
+	</>;
+});
 
 export const EditPasswordModal = observer(() => {
 	const telegramStore = useTelegramStore();
@@ -46,28 +74,11 @@ export const EditPasswordModal = observer(() => {
 				<>
 					<div className="w-full flex flex-col gap-6">
 						<div className="flex flex-col gap-2">
-							<Input
-								isRequired={true}
-								type="password"
-								label="2FA Password"
-								placeholder="Please enter the password..."
-								labelPlacement="outside"
-								value={value}
-								onValueChange={(value) => {
-									setValue(value.replaceAll(WHITESPACE, ""));
-								}}
-							/>
-							<Input
-								isRequired={true}
-								type="password"
-								label="Confirm"
-								placeholder="Please confirm the password..."
-								labelPlacement="outside"
-								value={confirm}
-								onValueChange={(value) => {
-									setConfirm(value.replaceAll(WHITESPACE, ""));
-								}}
-							/>
+							<EditPasswordInput value={value} onValueChange={(value) => {
+								setValue(value.replaceAll(WHITESPACE, ""));
+							}} valueConfirm={confirm} onValueChangeConfirm={(value) => {
+								setConfirm(value.replaceAll(WHITESPACE, ""));
+							}} />
 						</div>
 						<div className="flex flex-row gap-2">
 							<Tooltip content={error ?? ""} isDisabled={error === null}>
@@ -78,7 +89,7 @@ export const EditPasswordModal = observer(() => {
 												        setValue("");
 												        setConfirm("");
 
-														telegramStore.socket.setPassword(telegramStore.modals.editPassword.phone, password);
+												        telegramStore.socket.setPassword(telegramStore.modals.editPassword.phone, password);
 
 												        telegramStore.modals.setEditPasswordClient(null);
 											        }}>

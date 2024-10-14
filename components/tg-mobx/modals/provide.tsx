@@ -66,12 +66,12 @@ export const ProvideValidators: { [key: string]: InputType } = {
 	}
 };
 
-export function ProvideInput(props: {
+export const ProvideInput = observer((props: {
 	type: InputType | null,
 	errorMsg: string | null,
 	value: string,
 	onValueChange: (newvalue: any) => void
-}) {
+}) => {
 	return <Input
 		isRequired={true}
 		type={props.type?.inputType}
@@ -86,7 +86,7 @@ export function ProvideInput(props: {
 		value={props.value}
 		onValueChange={props.onValueChange}
 	/>;
-}
+});
 
 export const ProvideModal = observer(() => {
 	const telegramStore = useTelegramStore();

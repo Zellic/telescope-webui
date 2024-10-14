@@ -4,7 +4,12 @@ import React, { Suspense, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { AddAccountModal } from "@/components/tg-mobx/modals/add-account";
 import { Button } from "@nextui-org/button";
-import { IAuthStage, ITelegramAccount, TelegramInstance, useTelegramStore } from "@/components/models/telegram";
+import {
+	IAuthStage,
+	ITelegramAccount,
+	TelegramInstance,
+	useTelegramStore
+} from "@/components/models/telegram";
 import { useAsyncIntervalForeground } from "@/components/hooks/useRepeat";
 import { MessageModal } from "@/components/tg-mobx/modals/message";
 import TelegramAccountTable, { AuthenticationCell, NameCell, StatusCell } from "@/components/tg-mobx/account-table";
@@ -17,6 +22,7 @@ import { Input } from "@nextui-org/input";
 import { FaArrowRight, FaArrowRightArrowLeft } from "react-icons/fa6";
 import { Chip, Spinner } from "@nextui-org/react";
 import { formatPhoneNumber, stageToStatus } from "@/components/tg-mobx/utils";
+import { EditPasswordInput, WHITESPACE } from "@/components/tg-mobx/modals/edit-password";
 
 function getValidator(store: TelegramInstance, account: ITelegramAccount) {
 	const stage = account.status.stage;
@@ -42,6 +48,53 @@ const OnboardingCard = observer(((props: { header: string, subtitle: string, chi
 		</div>
 	);
 }));
+
+const EditPassword = observer(() => {
+	const [value, setValue] = useState("");
+	const [confirm, setConfirm] = useState("");
+	const telegramStore = useTelegramStore();
+	const [submitting, setSubmitting] = useState(false);
+
+	useEffect(() => {
+		setSubmitting(false);
+	}, [telegramStore.ssoClient]);
+
+	let error: string | null = null;
+	if (value != confirm) {
+		error = "Password and confirm field must match.";
+	}
+
+	return (
+		<div className="flex flex-col gap-4">
+			<EditPasswordInput value={value} onValueChange={(value) => {
+				setValue(value.replaceAll(WHITESPACE, ""));
+			}} valueConfirm={confirm} onValueChangeConfirm={(value) => {
+				setConfirm(value.replaceAll(WHITESPACE, ""));
+			}} />
+			{error && <p className={"text-danger text-small"}>{error}</p>}
+			{submitting ? <Spinner className={"ml-auto"} /> :
+				<Button
+					size="md"
+					disabled={error != null || value.length === 0}
+					color={error == null && value.length > 0 ? "primary" : "default"}
+					fullWidth={false}
+					isIconOnly
+					className={"ml-auto"}
+					onClick={() => {
+						setSubmitting(true);
+						if (telegramStore.ssoClient)
+							telegramStore.socket.setPassword(telegramStore.ssoClient.phone, value);
+						setValue("");
+						setConfirm("");
+					}}
+				>
+					<FaArrowRight />
+				</Button>
+			}
+		</div>
+	);
+});
+
 
 const Onboarding = observer(() => {
 	const telegramStore = useTelegramStore();
@@ -100,7 +153,7 @@ const Onboarding = observer(() => {
 			<div className="text-center mb-4">
 				<h1 className="text-4xl font-bold mb-4">Telescope Onboarding</h1>
 				{!telegramStore.ssoClient &&
-                  <OnboardingCard header={"Telegram Information"} subtitle={"something about needing this..."}>
+                  <OnboardingCard header={"Telegram Information"} subtitle={"Provide your Telegram phone number"}>
                     <Input
                       className={"mb-4"}
                       isRequired={true}
@@ -150,7 +203,7 @@ const Onboarding = observer(() => {
 				}
 			</div>
 			{telegramStore.ssoClient && telegramStore.ssoClient.status.stage !== "AuthorizationSuccess" &&
-              <OnboardingCard header={"2FA & Password"} subtitle={"something about password security..."}>
+              <OnboardingCard header={"2FA & Password"} subtitle={"Authenticate your Telegram account"}>
                 <div className={"flex justify-between"}>
                   <div>
                     <p
@@ -191,6 +244,7 @@ const Onboarding = observer(() => {
 						  className={"ml-auto mt-4"}
 						  onClick={() => {
 							  setSubmittingInfo(true);
+							  // telegramStore.setMockStage("AuthorizationSuccess");
 							  telegramStore.socket.submitValue(telegramStore.ssoClient!.phone, telegramStore.ssoClient!.status.stage, provideValue);
 						  }}
 					  >
@@ -200,11 +254,9 @@ const Onboarding = observer(() => {
               </OnboardingCard>
 			}
 			{telegramStore.ssoClient && telegramStore.ssoClient.status.stage === "AuthorizationSuccess" &&
-              <Card className={"max-w-[500px]"} fullWidth={true}>
-                <CardBody>
-                  <h1>You have already been onboarded :)</h1>
-                </CardBody>
-              </Card>
+              <OnboardingCard header={"You have been onboarded"} subtitle={"Here you can edit your 2FA password"}>
+                <EditPassword />
+              </OnboardingCard>
 			}
 		</div>
 	);
