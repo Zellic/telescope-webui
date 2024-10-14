@@ -19,12 +19,6 @@ export const AddAccountModal = observer(() => {
 	const [email, setEmail] = useState("");
 	const [comment, setComment] = useState("");
 
-	useEffect(() => {
-		if (telegramStore.modals.addAccount === "onboarding") {
-			setEmail(telegramStore.ssoEmail || "");
-		}
-	}, [telegramStore.modals.addAccount]);
-
 	const onClose = () => {
 		telegramStore.modals.setAddAccount(null);
 	};
@@ -52,7 +46,6 @@ export const AddAccountModal = observer(() => {
 					<Input
 						isRequired={false}
 						type="email"
-						isReadOnly={telegramStore.modals.addAccount === "onboarding"}
 						label="E-mail"
 						placeholder="Enter email..."
 						labelPlacement="outside"
@@ -83,10 +76,6 @@ export const AddAccountModal = observer(() => {
 					setSubmitting(true);
 
 					telegramStore.socket.addAccount(phoneNumber, valueOrNull(email), valueOrNull(comment));
-					if (telegramStore.modals.addAccount === "onboarding") {
-						telegramStore.modals.setAddAccountPhone(phoneNumber);
-					}
-
 					telegramStore.modals.setAddAccount(null);
 					setSubmitting(false);
 				}}>

@@ -67,13 +67,17 @@ const TelegramModel = types
 	})
 	.actions(self => {
 		function updateFromSocket(message: SocketRecvMessage) {
-			console.log(message.type);
+			if (process.env.NEXT_PUBLIC_DEBUG_LOG)
+				console.log(message);
+
 			switch (message.type) {
 				case MessageRecvType.CLIENT_START: {
 					// @ts-ignore the typing below is correct
 					self.clients = message.data.items || [];
 					self.environment = message.data.environment;
 					self.clientsState = "done";
+					if (self.ssoEmail)
+						self.ssoClient = self.clients.find(u => u.email === self.ssoEmail);
 					break;
 				}
 				case MessageRecvType.SSO_START: {
@@ -83,7 +87,7 @@ const TelegramModel = types
 				}
 				case MessageRecvType.ADD_ACCOUNT_RESPONSE: {
 					self.socket.responseStatus = "received";
-					if (message.data.status === 'ERROR') {
+					if (message.data.status === "ERROR") {
 						self.modals.setMessageBasic(
 							"Error",
 							`Failed to add account: ${message.data.error}`
@@ -151,8 +155,16 @@ const TelegramModel = types
 			}
 		}
 
+		// NOTE: DO NOT USE THIS. This is used to test the view under different client states.
+		function setMockStage(s: IAuthStage) {
+			if (self.ssoClient) {
+				self.ssoClient.status.stage = s;
+			}
+		}
+
 		return {
-			updateFromSocket
+			updateFromSocket,
+			setMockStage
 		};
 	});
 
@@ -185,5 +197,6 @@ export function useTelegramStore() {
 }
 
 onSnapshot(telegramStore, (snapshot) => {
-	console.log("snapshot", snapshot);
+	if (process.env.NEXT_PUBLIC_DEBUG_LOG)
+		console.log("snapshot", snapshot);
 });

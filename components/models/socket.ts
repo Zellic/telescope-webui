@@ -15,6 +15,9 @@ export const WebSocketStore = types
 			self.socketState = state;
 		},
 
+		// NOTE: WHEN RUNNING IN DEV REACTSTRICTMODE IS DEFAULT ON AND
+		//       WILL CAUSE THE ERROR STATE TO ALWAYS FLICKER ON LOAD
+		//       ONERROR->ONCLOSED->ONOPEN
 		connect(url: string) {
 			if (self.socket) {
 				self.socket.close();
@@ -37,7 +40,6 @@ export const WebSocketStore = types
 
 			self.socket.onmessage = (event) => {
 				const message = JSON.parse(event.data);
-				console.log(message);
 				if (message.hasOwnProperty("type")) {
 					// @ts-ignore: dont want to include the type (circular)
 					getRoot(self).updateFromSocket(message);

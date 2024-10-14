@@ -40,7 +40,6 @@ export const MessageModal = types.model({
 //                actions / simple popups that dont need their own component
 export const Modals = types.model({
 	addAccount: types.maybeNull(types.enumeration("AddAccountMode", ["normal", "onboarding"])),
-	addAccountPhone: types.maybeNull(types.string), // used phone number to add the account ( for /onboarding )
 	provide: ClientReference,
 	editPassword: ClientReference,
 	deleteClient: ClientReference,
@@ -60,10 +59,6 @@ export const Modals = types.model({
 
 	function setAddAccount(state: "normal" | "onboarding" | null) {
 		self.addAccount = state;
-	}
-
-	function setAddAccountPhone(phone: string) {
-		self.addAccountPhone = phone;
 	}
 
 	function setMessage(title: string, message: string, buttons: Array<IMessageModalButton>, client?: ITelegramAccount) {
@@ -102,7 +97,6 @@ export const Modals = types.model({
 		setEditPasswordClient,
 		setDeleteClient,
 		setAddAccount,
-		setAddAccountPhone,
 		setMessage,
 		setMessageBasic,
 		clearMessage,

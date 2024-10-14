@@ -25,7 +25,7 @@ interface InputType {
 	validate: (str: string) => string | null;
 }
 
-const validators: { [key: string]: InputType } = {
+export const ProvideValidators: { [key: string]: InputType } = {
 	"PasswordRequired": {
 		name: "PasswordRequired",
 		inputType: "text",
@@ -66,13 +66,35 @@ const validators: { [key: string]: InputType } = {
 	}
 };
 
+export function ProvideInput(props: {
+	type: InputType | null,
+	errorMsg: string | null,
+	value: string,
+	onValueChange: (newvalue: any) => void
+}) {
+	return <Input
+		isRequired={true}
+		type={props.type?.inputType}
+		label={props.type?.label}
+		placeholder={props.type?.placeholder}
+		maxLength={props.type?.maxLength}
+
+		isInvalid={props.errorMsg !== null}
+		color={props.errorMsg !== null ? "danger" : "success"}
+		errorMessage={props.errorMsg ?? ""}
+
+		value={props.value}
+		onValueChange={props.onValueChange}
+	/>;
+}
+
 export const ProvideModal = observer(() => {
 	const telegramStore = useTelegramStore();
 	const [submitting, setSubmitting] = useState(false);
 	const [value, setValue] = useState("");
 
 	const isOpen = telegramStore.modals.provide !== null;
-	const type = isOpen ? validators[telegramStore.modals.provide!.status.stage] : null;
+	const type = isOpen ? ProvideValidators[telegramStore.modals.provide!.status.stage] : null;
 
 	let errorMsg: string | null = null;
 	if (type !== null && type?.validate !== null) {
@@ -94,26 +116,13 @@ export const ProvideModal = observer(() => {
 					Please enter the thingy.
 				</p>
 				<div>
-					<Input
-						isRequired={true}
-						type={type?.inputType}
-						label={type?.label}
-						placeholder={type?.placeholder}
-						maxLength={type?.maxLength}
-
-						isInvalid={errorMsg !== null}
-						color={errorMsg !== null ? "danger" : "success"}
-						errorMessage={errorMsg ?? ""}
-
-						value={value}
-						onValueChange={(newvalue) => {
-							if (type?.filter_regex) {
-								setValue(newvalue.replaceAll(type.filter_regex, ""));
-							} else {
-								setValue(newvalue);
-							}
-						}}
-					/>
+					<ProvideInput type={type} errorMsg={errorMsg} value={value} onValueChange={(newvalue) => {
+						if (type?.filter_regex) {
+							setValue(newvalue.replaceAll(type.filter_regex, ""));
+						} else {
+							setValue(newvalue);
+						}
+					}} />
 				</div>
 			</>}
 			footer={submitting ? <Spinner /> : <>

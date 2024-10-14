@@ -24,7 +24,7 @@ const TelegramAccountManager = observer(() => {
 		};
 	}, [])
 
-	if (telegramStore.socket.socketState === 'error') {
+	if (telegramStore.socket.socketState === 'error' || telegramStore.socket.socketState === 'closed') {
 		return (
 			<Card>
 				<CardBody>Failed to reach server. Please try again later.</CardBody>
