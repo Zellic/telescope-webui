@@ -5,21 +5,18 @@ import { observer } from "mobx-react-lite";
 import { AddAccountModal } from "@/components/tg-mobx/modals/add-account";
 import { Button } from "@nextui-org/button";
 import {
-	IAuthStage,
 	ITelegramAccount,
 	TelegramInstance,
 	useTelegramStore
 } from "@/components/models/telegram";
-import { useAsyncIntervalForeground } from "@/components/hooks/useRepeat";
 import { MessageModal } from "@/components/tg-mobx/modals/message";
-import TelegramAccountTable, { AuthenticationCell, NameCell, StatusCell } from "@/components/tg-mobx/account-table";
 import { ProvideInput, ProvideModal, ProvideValidators } from "@/components/tg-mobx/modals/provide";
 import { redirect, useSearchParams } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { ApiService } from "@/components/api";
 import { Divider } from "@nextui-org/divider";
 import { Input } from "@nextui-org/input";
-import { FaArrowRight, FaArrowRightArrowLeft } from "react-icons/fa6";
+import { FaArrowRight } from "react-icons/fa6";
 import { Chip, Spinner } from "@nextui-org/react";
 import { formatPhoneNumber, stageToStatus } from "@/components/tg-mobx/utils";
 import { EditPasswordInput, WHITESPACE } from "@/components/tg-mobx/modals/edit-password";
@@ -127,7 +124,7 @@ const Onboarding = observer(() => {
 	useEffect(() => {
 		setSubmittingInfo(false);
 		setProvideValue("");
-	}, [telegramStore.ssoClient]);
+	}, [telegramStore.ssoClient?.status.stage]);
 
 	if (telegramStore.ssoClient?.status.stage === "AuthorizationSuccess") {
 		const url = searchParams.get("redirect");
