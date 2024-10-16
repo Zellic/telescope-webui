@@ -15,7 +15,7 @@ export const NameCell = observer(({ account }: AccountCell) => {
 		<div className="flex flex-col">
 			<p className="text-bold text-sm">{account.username ?? account.name ?? "<no username>"}</p>
 			<p className="text-bold text-sm text-default-400">{formatPhoneNumber(account.phone)}</p>
-			{/* Phone numbers are only 10 characters long on staging (we ignore country codes on staging) */}
+			{/* Phone numbers are only 10 characters long on development (we ignore country codes on development) */}
 			{account.phone.length === 10 &&
               <p className="text-bold text-sm text-default-400">Code: {account.phone[5].repeat(5)}</p>}
 			<p className="text-bold text-sm text-default-400">{account.email}</p>

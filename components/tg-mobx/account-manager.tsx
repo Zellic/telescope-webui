@@ -42,7 +42,7 @@ const TelegramAccountManager = observer(() => {
 						telegramStore.modals.setAddAccount("normal");
 					}}>Add Account</Button>
 
-					{telegramStore.environment == "Staging" &&
+					{telegramStore.environment == "Development" &&
                       <Button size="sm" onClick={() => {
 						  telegramStore.modals.setMessage("Add Test Account", "Really add test acccount?", [
 							  {

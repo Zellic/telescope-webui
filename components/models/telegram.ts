@@ -51,7 +51,7 @@ export const TelegramAccount = types.model({
 
 export type ITelegramAccount = Instance<typeof TelegramAccount>;
 
-export const Environment = types.enumeration("Environment", ["Staging", "Production"]);
+export const Environment = types.enumeration("Environment", ["Development", "Production"]);
 export type IEnvironment = Instance<typeof Environment>
 
 const TelegramModel = types
