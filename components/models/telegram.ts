@@ -1,6 +1,6 @@
 "use client";
 
-import { flow, Instance, ISimpleType, onSnapshot, types } from "mobx-state-tree";
+import { flow, getRoot, Instance, ISimpleType, onSnapshot, types } from "mobx-state-tree";
 import { createContext, useContext } from "react";
 import { ApiService } from "@/components/api";
 import { ClientReference, Modals } from "@/components/models/modal";
@@ -36,6 +36,7 @@ export const TelegramAccount = types.model({
 	email: types.maybeNull(types.string),
 	comment: types.maybeNull(types.string),
 	phone: types.string,
+	two_factor_pass_is_set: types.boolean,
 	lastCode: types.maybeNull(types.model({
 		value: types.number,
 		date: types.number
@@ -152,6 +153,17 @@ const TelegramModel = types
 					}
 					break;
 				}
+				case MessageRecvType.GET_PASSWORD_RESPONSE: {
+					self.socket.responseStatus = 'received';
+					if (message.data.status === 'ERROR') {
+						self.modals.setViewPasswordState('failure');
+						self.modals.setMessageBasic("Error", `${message.data.error}`);
+					} else {
+						self.modals.setViewPassword(message.data.value)
+						self.modals.setViewPasswordState('ok');
+					}
+					break;
+				}
 			}
 		}
 
@@ -176,7 +188,10 @@ export const telegramStore = TelegramModel.create({
 	clients: [],
 	clientsState: "pending",
 	environment: "Production",
-	modals: {},
+	modals: {
+		viewPasswordPass: "",
+		viewPasswordState: 'waiting'
+	},
 	socket: {
 		socketState: "connecting",
 		responseStatus: "received"

@@ -124,6 +124,17 @@ export const WebSocketStore = types
 			})
 		},
 
+		getPassword(phone: string) {
+			// @ts-ignore: dont want to include the type (circular)
+			getRoot(self).modals.setViewPasswordState('waiting');
+			this.sendMessage({
+				type: MessageSendType.GET_PASSWORD,
+				data: {
+					phone
+				}
+			})
+		},
+
 		// note: we dont set this always within here, because we dont always need to 'wait' on a response
 		// this should be done per use within the component if you want a waiting state.
 		setWaiting() {

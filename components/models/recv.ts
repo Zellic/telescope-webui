@@ -10,6 +10,7 @@ export enum MessageRecvType {
 	CONNECT_CLIENT_RESPONSE = "CONNECT_CLIENT_RESPONSE",
 	DISCONNECT_CLIENT_RESPONSE = "DISCONNECT_CLIENT_RESPONSE",
 	SET_PASSWORD_RESPONSE = "SET_PASSWORD_RESPONSE",
+	GET_PASSWORD_RESPONSE = "GET_PASSWORD_RESPONSE",
 }
 
 interface GenericResponseData {
@@ -33,6 +34,7 @@ interface MessageDataMap {
 	[MessageRecvType.CONNECT_CLIENT_RESPONSE]: GenericResponseData;
 	[MessageRecvType.DISCONNECT_CLIENT_RESPONSE]: GenericResponseData;
 	[MessageRecvType.SET_PASSWORD_RESPONSE]: GenericResponseData;
+	[MessageRecvType.GET_PASSWORD_RESPONSE]: GenericResponseData & {value: string};
 }
 
 // SocketRecvMessage converts map above into

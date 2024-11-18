@@ -4,7 +4,7 @@ import { Button } from "@nextui-org/button";
 import { getElapsedTime } from "@/components/time";
 import { TiMessageTyping } from "react-icons/ti";
 import { ApiService } from "@/components/api";
-import { MdDeleteForever, MdModeEdit, MdOutlineLogin } from "react-icons/md";
+import { MdDeleteForever, MdModeEdit, MdOutlineLogin, MdPassword } from "react-icons/md";
 import { VscDebugDisconnect } from "react-icons/vsc";
 import React, { Fragment } from "react";
 import { ITelegramAccount, PrivilegeUnion, useTelegramStore } from "@/components/models/telegram";
@@ -114,6 +114,10 @@ export const ActionButtons = observer(({ account, onboarding }: { account: ITele
 				               }} />
 			}
 
+			<TooltipButton content={'View 2FA password'} icon={MdPassword} disabled={onboarding || !account.two_factor_pass_is_set} onClick={() => {
+				telegramStore.socket.getPassword(account.phone)
+				telegramStore.modals.setViewPasswordClient(account);
+			}}/>
 		</IconContext.Provider>
 	);
 });

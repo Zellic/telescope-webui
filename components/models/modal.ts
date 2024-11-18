@@ -42,6 +42,9 @@ export const Modals = types.model({
 	addAccount: types.maybeNull(types.enumeration("AddAccountMode", ["normal", "onboarding"])),
 	provide: ClientReference,
 	editPassword: ClientReference,
+	viewPassword: ClientReference,
+	viewPasswordState: types.enumeration("GetPassword", ["failure", "ok", "waiting"]),
+	viewPasswordPass: types.string,
 	deleteClient: ClientReference,
 	message: types.maybeNull(MessageModal)
 }).actions(self => {
@@ -51,6 +54,18 @@ export const Modals = types.model({
 
 	function setEditPasswordClient(client: ITelegramAccount | null) {
 		self.editPassword = client;
+	}
+
+	function setViewPasswordClient(client: ITelegramAccount | null) {
+		self.viewPassword = client;
+	}
+
+	function setViewPassword(pass: string) {
+		self.viewPasswordPass = pass;
+	}
+
+	function setViewPasswordState(state: "failure" | "ok" | "waiting") {
+		self.viewPasswordState = state;
 	}
 
 	function setDeleteClient(client: ITelegramAccount | null) {
@@ -95,6 +110,9 @@ export const Modals = types.model({
 	return {
 		setProvideClient,
 		setEditPasswordClient,
+		setViewPasswordClient,
+		setViewPassword,
+		setViewPasswordState,
 		setDeleteClient,
 		setAddAccount,
 		setMessage,
