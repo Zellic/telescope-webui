@@ -105,6 +105,15 @@ export const WebSocketStore = types
 			});
 		},
 
+		terminateOtherSessions(phone: string) {
+			this.sendMessage({
+				type: MessageSendType.TERMINATE_OTHER_SESSIONS,
+				data: {
+					phone
+				}
+			});
+		},
+
 		connectClient(phone: string) {
 			this.sendMessage({
 				type: MessageSendType.CONNECT_CLIENT,

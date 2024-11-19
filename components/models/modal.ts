@@ -2,7 +2,7 @@ import { flow, getRoot, Instance, types } from "mobx-state-tree";
 import { ITelegramAccount } from "@/components/models/telegram";
 import { ApiService } from "@/components/api";
 
-export const ModalButtonActionType = types.enumeration("ActionType", ["default", "disconnect", "add_test_account"]);
+export const ModalButtonActionType = types.enumeration("ActionType", ["default", "disconnect", "add_test_account", "terminate"]);
 export type IModalButtonActionType = Instance<typeof ModalButtonActionType>;
 
 export const MessageModalButton = types.model({

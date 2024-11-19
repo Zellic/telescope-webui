@@ -164,6 +164,15 @@ const TelegramModel = types
 					}
 					break;
 				}
+				case MessageRecvType.TERMINATE_OTHER_SESSIONS_RESPONSE: {
+					self.socket.responseStatus = "received";
+					if (message.data.status === "ERROR") {
+						self.modals.setMessageBasic("Error", `Couldn't terminate other sessions: ${message.data.error}`);
+					} else {
+						self.modals.setMessageBasic("Success", `Terminated all other sessions.`);
+					}
+					break;
+				}
 			}
 		}
 

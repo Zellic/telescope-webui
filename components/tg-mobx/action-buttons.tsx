@@ -4,7 +4,7 @@ import { Button } from "@nextui-org/button";
 import { getElapsedTime } from "@/components/time";
 import { TiMessageTyping } from "react-icons/ti";
 import { ApiService } from "@/components/api";
-import { MdDeleteForever, MdModeEdit, MdOutlineLogin, MdPassword } from "react-icons/md";
+import { MdDeleteForever, MdModeEdit, MdOutlineLogin, MdOutlineLogout, MdPassword } from "react-icons/md";
 import { VscDebugDisconnect } from "react-icons/vsc";
 import React, { Fragment } from "react";
 import { ITelegramAccount, PrivilegeUnion, useTelegramStore } from "@/components/models/telegram";
@@ -96,6 +96,25 @@ export const ActionButtons = observer(({ account, onboarding }: { account: ITele
 				<ConnectionButtons onboarding={onboarding} account={account} />
 			}
 
+			{!has("manage_connection_state") ? null :
+				<TooltipButton content={'Terminate other sessions'} icon={MdOutlineLogout} disabled={onboarding || account.status.stage != 'AuthorizationSuccess'} onClick={() => {
+					telegramStore.modals.setMessage("Terminate other sesesions", `Really terminate other sessions for ${account.phone}?`, [
+						{
+							key: "terminate",
+							label: "Terminate",
+							color: "danger",
+							actionType: "terminate"
+						},
+						{
+							key: "cancel",
+							label: "Cancel",
+							color: "default",
+							actionType: "default"
+						}
+					], account);
+				}}/>
+			}
+
 			{!has("edit_two_factor_password") ? null :
 				<TooltipButton content={"Edit account's 2FA password"}
 				               icon={MdModeEdit}
@@ -105,6 +124,11 @@ export const ActionButtons = observer(({ account, onboarding }: { account: ITele
 				               }} />
 			}
 
+			<TooltipButton content={'View 2FA password'} icon={MdPassword} disabled={onboarding || !account.two_factor_pass_is_set} onClick={() => {
+				telegramStore.socket.getPassword(account.phone)
+				telegramStore.modals.setViewPasswordClient(account);
+			}}/>
+
 			{!has("remove_account") ? null :
 				<TooltipButton content={"Remove account from Telescope"}
 				               icon={MdDeleteForever} color={"danger"}
@@ -113,11 +137,6 @@ export const ActionButtons = observer(({ account, onboarding }: { account: ITele
 					               telegramStore.modals.setDeleteClient(account);
 				               }} />
 			}
-
-			<TooltipButton content={'View 2FA password'} icon={MdPassword} disabled={onboarding || !account.two_factor_pass_is_set} onClick={() => {
-				telegramStore.socket.getPassword(account.phone)
-				telegramStore.modals.setViewPasswordClient(account);
-			}}/>
 		</IconContext.Provider>
 	);
 });

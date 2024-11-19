@@ -6,7 +6,8 @@ export enum MessageSendType {
 	CONNECT_CLIENT = "CONNECT_CLIENT",
 	DISCONNECT_CLIENT = "DISCONNECT_CLIENT",
 	SET_PASSWORD = "SET_PASSWORD",
-	GET_PASSWORD = "GET_PASSWORD"
+	GET_PASSWORD = "GET_PASSWORD",
+	TERMINATE_OTHER_SESSIONS = "TERMINATE_OTHER_SESSIONS"
 }
 
 interface MessageDataMap {
@@ -35,6 +36,9 @@ interface MessageDataMap {
 		password: string;
 	};
 	[MessageSendType.GET_PASSWORD]: {
+		phone: string;
+	}
+	[MessageSendType.TERMINATE_OTHER_SESSIONS]: {
 		phone: string;
 	}
 }

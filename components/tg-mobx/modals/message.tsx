@@ -27,7 +27,16 @@ const MessageActions: Record<IModalButtonActionType, (telegramStore: TelegramIns
 	'add_test_account': (telegramStore: TelegramInstance) => {
 		telegramStore.modals.clearMessage();
 		telegramStore.socket.addTestAccount();
-	}
+	},
+	'terminate': (telegramStore: TelegramInstance) => {
+		const client = telegramStore.modals.message?.client;
+
+		telegramStore.modals.clearMessage();
+
+		if (client) {
+			telegramStore.socket.terminateOtherSessions(client.phone);
+		}
+	},
 }
 
 export const MessageModal = observer(() => {
