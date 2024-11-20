@@ -28,9 +28,16 @@ export const StatusCell = observer(({ account }: AccountCell) => {
 	const status = stageToStatus(account);
 
 	return (
-		<Chip className="capitalize" color={status as any} size="sm" variant="flat">
-			{account.status.stage}
-		</Chip>
+		<div className={"flex flex-col gap-2"}>
+			<Chip className="capitalize" color={status as any} size="sm" variant="flat">
+				{account.status.stage}
+			</Chip>
+			{account.two_factor_protected != null && account.two_factor_protected == false &&
+              <Chip className="capitalize" color={status as any} size="sm" variant="flat">
+				  MissingTwoFactor
+              </Chip>
+			}
+		</div>
 	);
 });
 
@@ -54,7 +61,7 @@ export const AuthenticationCell = observer(({ account }: AccountCell) => {
 	);
 });
 
-const ActionsCell = observer(({ account, onboarding }: AccountCell & {onboarding?: boolean}) => {
+const ActionsCell = observer(({ account, onboarding }: AccountCell & { onboarding?: boolean }) => {
 	return (
 		<div className="relative flex items-center gap-2">
 			<ActionButtons account={account} onboarding={onboarding} />
@@ -70,7 +77,7 @@ const columns = [
 	{ name: "ACTIONS", uid: "actions" }
 ];
 
-const TelegramAccountTable = observer(({onboarding}: {onboarding?: boolean}) => {
+const TelegramAccountTable = observer(({ onboarding }: { onboarding?: boolean }) => {
 	const telegramStore = useTelegramStore();
 
 	return (

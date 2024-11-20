@@ -37,6 +37,7 @@ export const TelegramAccount = types.model({
 	comment: types.maybeNull(types.string),
 	phone: types.string,
 	two_factor_pass_is_set: types.boolean,
+	two_factor_protected: types.maybeNull(types.boolean),
 	lastCode: types.maybeNull(types.model({
 		value: types.number,
 		date: types.number
