@@ -251,7 +251,7 @@ const Onboarding = observer(() => {
               </OnboardingCard>
 			}
 			{telegramStore.ssoClient && telegramStore.ssoClient.status.stage === "AuthorizationSuccess" &&
-              <OnboardingCard header={"You have been onboarded"} subtitle={"Here you can edit your 2FA password"}>
+			  <OnboardingCard header={"Save your 2FA password"} subtitle={"This password is stored encrypted, not hashed"}>
                 <EditPassword />
               </OnboardingCard>
 			}

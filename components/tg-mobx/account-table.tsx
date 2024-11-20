@@ -33,7 +33,7 @@ export const StatusCell = observer(({ account }: AccountCell) => {
 				{account.status.stage}
 			</Chip>
 			{account.two_factor_protected != null && account.two_factor_protected == false &&
-              <Chip className="capitalize" color={status as any} size="sm" variant="flat">
+              <Chip className="capitalize" color={'danger'} size="sm" variant="flat">
 				  MissingTwoFactor
               </Chip>
 			}

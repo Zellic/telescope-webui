@@ -17,6 +17,7 @@ export const ViewPasswordModal = observer(() => {
 
 	const onClose = () => {
 		telegramStore.modals.setViewPasswordClient(null);
+		setIsVisible(false);
 	};
 
 	if (telegramStore.modals.viewPasswordState === 'failure') {
