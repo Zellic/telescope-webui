@@ -40,7 +40,7 @@
 		"eslint-plugin-react": "^7.23.2",
 		"eslint-plugin-react-hooks": "^4.6.0",
 		"eslint-plugin-unused-imports": "^3.2.0",
-		"framer-motion": "~11.1.1",
+		"framer-motion": "^11.1.9",
 		"intl-messageformat": "^10.5.0",
 		"mobx": "^6.13.2",
 		"mobx-react-lite": "^4.0.7",
