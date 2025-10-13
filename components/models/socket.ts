@@ -44,7 +44,7 @@ export const WebSocketStore = types
 					// @ts-ignore: dont want to include the type (circular)
 					getRoot(self).updateFromSocket(message);
 				} else {
-					console.error("WebSocket data must contain an `id` field");
+					console.error("WebSocket data must contain a `type` field");
 				}
 			};
 		},
