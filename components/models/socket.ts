@@ -144,6 +144,15 @@ export const WebSocketStore = types
 			})
 		},
 
+		approveExportRequest(phone: string) {
+			this.sendMessage({
+				type: MessageSendType.APPROVE_EXPORT_REQUEST,
+				data: {
+					phone
+				}
+			})
+		},
+
 		// note: we dont set this always within here, because we dont always need to 'wait' on a response
 		// this should be done per use within the component if you want a waiting state.
 		setWaiting() {
