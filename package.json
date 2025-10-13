@@ -1,6 +1,6 @@
 {
 	"name": "next-app-template",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
@@ -19,8 +19,8 @@
 		"@nextui-org/react": "^2.4.2",
 		"@nextui-org/snippet": "2.0.37",
 		"@nextui-org/switch": "2.0.30",
-		"@nextui-org/system": "2.2.1",
-		"@nextui-org/theme": "2.2.5",
+		"@nextui-org/system": "^2.4.0",
+		"@nextui-org/theme": "^2.4.0",
 		"@nextui-org/card": "2.2.9",
 		"@react-aria/ssr": "3.9.4",
 		"@react-aria/visually-hidden": "3.8.12",
