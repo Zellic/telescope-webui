@@ -64,10 +64,11 @@ export const EditPasswordModal = observer(() => {
 			header={"Edit 2FA password"}
 			body={
 				<>
-					<p>You are submitting a new 2FA password for the following account:</p>
+					<p>Store 2FA password for the following account:</p>
 					<div className="flex items-center ml-6">
 						<NameCell account={telegramStore.modals.editPassword!} />
 					</div>
+					<p>Note: This does not update your 2FA password on the Telegram app, only the password stored in Telescope.</p>
 				</>
 			}
 			footer={
@@ -93,7 +94,7 @@ export const EditPasswordModal = observer(() => {
 
 												        telegramStore.modals.setEditPasswordClient(null);
 											        }}>
-												Change Password
+												Store Password
 											</Button>
 										</span>
 							</Tooltip>
