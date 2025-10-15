@@ -158,8 +158,6 @@ const Onboarding = observer(() => {
                       label="Phone number"
                       placeholder="Enter phone number..."
                       labelPlacement="outside"
-                      maxLength={11}
-                      pattern={"\d{11}"}
                       value={phoneNumber}
                       onValueChange={(value) => {
 						  setPhoneNumber(value);
@@ -182,15 +180,18 @@ const Onboarding = observer(() => {
 					  {submittingInfo ? <Spinner className={"ml-auto"} /> :
 						  <Button
 							  size="md"
-							  disabled={phoneNumber.length !== 11}
-							  color={phoneNumber.length === 11 ? "primary" : "default"}
+							  color={phoneNumber.length >= 0 ? "primary" : "default"}
 							  fullWidth={false}
 							  isIconOnly
 							  className={"ml-auto"}
 							  onClick={() => {
 								  setSubmittingInfo(true);
 								  // telegramStore.socket.addTestAccount();
-								  telegramStore.socket.addAccount(phoneNumber, email, null);
+								  const formattedPhoneNumber = phoneNumber
+								  	.replaceAll("-", "")
+									.replaceAll(" ", "")
+									.replaceAll("+", "");
+								  telegramStore.socket.addAccount(formattedPhoneNumber, email, null);
 							  }}
 						  >
 							  <FaArrowRight />
