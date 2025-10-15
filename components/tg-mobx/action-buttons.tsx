@@ -39,7 +39,7 @@ function TooltipButton(props: TooltipButtonProps) {
 export const ConnectionButtons = observer(({ account, onboarding }: { account: ITelegramAccount, onboarding?: boolean }) => {
 	const telegramStore = useTelegramStore();
 
-	if (account.status.stage === "ClientNotStarted") {
+	if (account.status.stage === "ClientNotStarted" || account.status.stage === "PhoneCodeExpired") {
 		return (
 			<TooltipButton content={"Connect Telegram session for this account"}
 			               icon={MdOutlineLogin}
