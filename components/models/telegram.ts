@@ -175,6 +175,15 @@ const TelegramModel = types
 					}
 					break;
 				}
+				case MessageRecvType.APPROVE_EXPORT_REQUEST_RESPONSE: {
+					self.socket.responseStatus = "received";
+					if (message.data.status === "ERROR") {
+						self.modals.setMessageBasic("Error", `Couldn't approve export request: ${message.data.error}`);
+					} else {
+						self.modals.setMessageBasic("Success", `Accepted export request.`);
+					}
+					break;
+				}
 			}
 		}
 

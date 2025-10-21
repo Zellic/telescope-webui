@@ -44,7 +44,7 @@ export const WebSocketStore = types
 					// @ts-ignore: dont want to include the type (circular)
 					getRoot(self).updateFromSocket(message);
 				} else {
-					console.error("WebSocket data must contain an `id` field");
+					console.error("WebSocket data must contain a `type` field");
 				}
 			};
 		},
@@ -138,6 +138,15 @@ export const WebSocketStore = types
 			getRoot(self).modals.setViewPasswordState('waiting');
 			this.sendMessage({
 				type: MessageSendType.GET_PASSWORD,
+				data: {
+					phone
+				}
+			})
+		},
+
+		approveExportRequest(phone: string) {
+			this.sendMessage({
+				type: MessageSendType.APPROVE_EXPORT_REQUEST,
 				data: {
 					phone
 				}

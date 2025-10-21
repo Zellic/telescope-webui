@@ -4,7 +4,7 @@ import { Button } from "@nextui-org/button";
 import { getElapsedTime } from "@/components/time";
 import { TiMessageTyping } from "react-icons/ti";
 import { ApiService } from "@/components/api";
-import { MdDeleteForever, MdModeEdit, MdOutlineLogin, MdOutlineLogout, MdPassword } from "react-icons/md";
+import { MdDeleteForever, MdModeEdit, MdOutlineLogin, MdOutlineLogout, MdPassword, MdBusAlert, MdDownload, MdCheck } from "react-icons/md";
 import { VscDebugDisconnect } from "react-icons/vsc";
 import React, { Fragment } from "react";
 import { ITelegramAccount, PrivilegeUnion, useTelegramStore } from "@/components/models/telegram";
@@ -136,6 +136,15 @@ export const ActionButtons = observer(({ account, onboarding }: { account: ITele
 				               onClick={() => {
 					               telegramStore.modals.setDeleteClient(account);
 				               }} />
+			}
+
+			{/* View here should be enough as users can accept export requests
+			 themselves from the telegram client.
+			 */}
+			{!has("view") ? null :
+				<TooltipButton content={'Approve export request'} icon={MdCheck} disabled={onboarding} onClick={() => {
+					telegramStore.socket.approveExportRequest(account.phone);
+				}}/>
 			}
 		</IconContext.Provider>
 	);
