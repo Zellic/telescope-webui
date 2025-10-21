@@ -19,7 +19,8 @@ export const AuthenticationStatus = types.model({
 		"ConnectionClosed",
 		"ErrorOccurred",
 		"PhoneNumberRequired",
-		"RegistrationRequired"
+		"RegistrationRequired",
+		"PhoneCodeExpired"
 	]),
 	inputRequired: types.boolean,
 	error: types.maybeNull(types.string)
